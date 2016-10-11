@@ -1,1 +1,1 @@
-import '../can-fixture-socket_test';
+require('../can-fixture-socket_test');

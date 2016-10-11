@@ -1,3 +1,5 @@
-export default function() {
-  return `This is the can-fixture-socket plugin`;
-}
+var Server = function(){};
+
+module.exports = {
+	Server: Server
+};
