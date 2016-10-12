@@ -7,6 +7,7 @@ var mockServer;
 QUnit.module('can-fixture-socket', {
 	beforeEach: function(){
 		mockServer = new fixtureSocket.Server();
+		window.mockSever = mockServer;
 	},
 	afterEach: function(){
 	}
@@ -17,7 +18,8 @@ QUnit.test('basic connection', function(){
 	//
 	// Mock server:
 	//
-	mockServer.on('connection', function(socket){
+	mockServer.on('connection', function(){
+		debugger;
 		mockServer.emit('notifications', {test: 'OK'})
 	});
 
@@ -25,11 +27,14 @@ QUnit.test('basic connection', function(){
 	// Test client:
 	//
 	QUnit.expect(2);
+	debugger;
 	var socket = io('localhost');
 	socket.on('connect', function(){
+		console.log('GOOD 1!');
 		QUnit.ok(true, 'connected');
 	});
 	socket.on('notifications', function(data){
+		console.log('GOOD 2!');
 		QUnit.deepEqual(data, {test: 'OK'});
 	});
 });
@@ -40,7 +45,8 @@ QUnit.test('basic connection', function(){
  * - on created / updated message send ACK with message data and emit created / updated event.
  * - on deleted send ACK with {success: true} and emit deleted event with the removed message id.
  */
-QUnit.test('CRUD service', function(){
+QUnit.noop = function(){};
+QUnit.noop('CRUD service', function(){
 	//
 	// Mock server:
 	//
@@ -113,7 +119,7 @@ QUnit.test('CRUD service', function(){
  *     - send("messages::create", data, query)
  *     - send("messages::update", id, data, query)
  */
-QUnit.test('Test fixture store', function(){
+QUnit.noop('Test fixture store', function(){
 	//
 	// Mock server
 	//

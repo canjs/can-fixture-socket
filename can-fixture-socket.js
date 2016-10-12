@@ -1,24 +1,44 @@
 var io = require('socket.io-client');
 
+/**
+ * Manager is created for url. One manager can create several sockets.
+ */
 var managerProto = io.Manager.prototype;
-var methods = ['open','connect','on','emit','once'];
+var methods = ['open','socket'];
 var origs = methods.map(function(name){ return managerProto[name];});
-
+var MockedSocket = function(server){
+	this.server = server;
+};
+MockedSocket.prototype = {
+	on: function(event, cb){
+		console.log('MockedSocket.on ... ' + event);
+		sub(this.server.subscribers, event, cb);
+	},
+	emit: function(event, data, ack){
+		console.log('MockedSocket.emit ...' + event);
+		pub(this.server.events, event, data);
+	},
+	once: function(){
+		console.log('MockedSocket.once ...');
+	}
+};
 function mockSocketIO(server, options){
 	managerProto.open = managerProto.connect = function(){
-		console.log('Mocked prototype.open or connect ... arguments:', arguments);
-		pub(server.events, 'connection');
+		if (this.__fixture__opened){
+			// io.socket makes sure connection is opened so `open` gets called twice.
+			console.log('already opened');
+			return;
+		}
+		this.__fixture__opened = true;
+		console.log('MockedManager.prototype.open or connect ... arguments:', arguments);
+		setTimeout(function(){
+			pub(server.subscribers, 'connect');
+			pub(server.events, 'connection');
+		}, 0);
 	};
-	managerProto.on = function(name, cb){
-		console.log('Mocked prototype.on ...');
-		sub(server.subscribers, name, cb);
-	};
-	managerProto.emit = function(name, data, ack){
-		console.log('Mocked prototype.emit ...');
-		pub(server.events, event, data);
-	};
-	managerProto.once = function(){
-		console.log('Mocked prototype.once ...');
+	managerProto.socket = function(){
+		console.log('MockedManager.prototype.socket ...');
+		return new MockedSocket(server);
 	};
 }
 function restore(){
@@ -33,7 +53,7 @@ var Server = function(){
 	mockSocketIO(this, {});
 };
 Server.prototype.on = function(event, cb){
-	console.log('server.on');
+	console.log('server.on ' + event);
 	sub(this.events,  event, cb);
 };
 Server.prototype.emit = function(event, data, ack){
@@ -50,8 +70,10 @@ function pub(pubsub, event, data){
 }
 function sub(pubsub, event, cb){
 	console.log(' <<< sub ' + event);
-	var subscribers = pubsub[event] || [];
-	subscribers.push(cb);
+	if (!pubsub[event]){
+		pubsub[event] = [];
+	}
+	pubsub[event].push(cb);
 }
 
 module.exports = {
