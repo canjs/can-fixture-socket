@@ -4,47 +4,70 @@ var fixtureSocket = require('./can-fixture-socket').Server;
 
 var mockServer;
 
-
-/**
- * Ex. 1. Emulate a low level CRUD API.
- * Let the protocol be:
- * - on created / updated message send ACK with message data and emit created / updated event.
- * - on deleted send ACK with {success: true} and emit deleted event with the removed message id.
- */
-QUnit.module('Low level API', {
+// Test fixture connection
+QUnit.module('can-fixture-socket', {
 	beforeEach: function(){
-		// Mock server:
 		mockServer = new fixtureSocket.Server();
-		mockServer.on('connection', function(socket){
-			mockServer.on('messages create', function(data, fn){	// fn is the ACK callback
-				data.id = 1;
-
-				// send ack on the received event:
-				fn(data);
-
-				mockServer.emit('messages create', data);
-			});
-
-			mockServer.on('messages update', function(data, fn){
-				// send ack on the received event:
-				fn(data);
-
-				mockServer.emit('messages update', data);
-			});
-
-			mockServer.on('message deleted', function(data, fn){
-				// send ack on the received event:
-				fn({success: true});
-
-				mockServer.emit('message deleted', {id: data.id});
-			});
-		});
 	},
 	afterEach: function(){
 		mockServer.reset();
 	}
 });
-QUnit.test('Message CRUD', function(){
+QUnit.test('basic connection', function(){
+	//
+	// Mock server:
+	//
+	mockServer.on('connection', function(socket){
+		mockServer.emit('notifications', {test: 'OK'})
+	});
+	
+	//
+	// Test client:
+	//
+	QUnit.expects(2);
+	var socket = io('localhost');
+	socket.on('connect', function(){
+		QUnit.ok(true, 'connected');
+	});
+	socket.on('notifications', function(data){
+		QUnit.deepEqual(data, {test: 'OK'});
+	});
+});
+
+/**
+ * Emulate a low level CRUD API.
+ * Let the protocol be:
+ * - on created / updated message send ACK with message data and emit created / updated event.
+ * - on deleted send ACK with {success: true} and emit deleted event with the removed message id.
+ */
+QUnit.test('CRUD service', function(){
+	//
+	// Mock server:
+	//
+	mockServer.on('messages create', function(data, fn){	// fn is the ACK callback
+		data.id = 1;
+
+		// send ack on the received event:
+		fn(data);
+
+		mockServer.emit('messages created', data);
+	});
+	mockServer.on('messages update', function(data, fn){
+		// send ack on the received event:
+		fn(data);
+
+		mockServer.emit('messages updated', data);
+	});
+	mockServer.on('messages deleted', function(data, fn){
+		// send ack on the received event:
+		fn({success: true});
+
+		mockServer.emit('messages deleted', {id: data.id});
+	});
+	
+	//
+	// Test client:
+	//
 	QUnit.expects(5);
 
 	var socket = io('localhost');
@@ -90,27 +113,29 @@ QUnit.test('Message CRUD', function(){
  *     - send("messages::create", data, query)
  *     - send("messages::update", id, data, query)
  */
-QUnit.module('Fixture store', {
-	before: function(){
-		// Options like mapping methods (e.g. can-connect dataUrl -> feathers).
-		var options = {
-			getListData: 'find',
-			getData: 'get',
-			createData: 'create',
-			updateData: 'update',
-			destroyData: 'remove'
-		};
-		mockServer = new fixtureSocket.ServerStore({
-			messages: [
-				{id: 1, title: 'One'},
-				{id: 2, title: 'Two'}
-			]
-		}, options);
-	}
-});
-
 QUnit.test('Test fixture store', function(){
+	//
+	// Mock server
+	//
+	var messagesStore = fixture.store([
+		{id: 1, title: 'One'},
+		{id: 2, title: 'Two'}
+	]);
 
+	// Options like mapping methods (e.g. fixture.store -> feathers).
+	var options = {
+		getListData: 'find',
+		getData: 'get',
+		createData: 'create',
+		updateData: 'update',
+		destroyData: 'remove'
+	};
+
+	fixtureSocket.connectStore('messages', messagesStore, options);
+	
+	//
+	// Test client:
+	//
 	var socket = io('localhost');
 	
 	socket.on('connect', function(){
