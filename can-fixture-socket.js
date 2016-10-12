@@ -1,11 +1,40 @@
 var io = require('socket.io-client');
 
 /**
- * Manager is created for url. One manager can create several sockets.
+ * Manager is created for a url.
+ * One manager can create several sockets.
  */
-var managerProto = io.Manager.prototype;
-var methods = ['open','socket'];
-var origs = methods.map(function(name){ return managerProto[name];});
+var Server = function(){
+	this.events = {};
+	this.subscribers = {};
+	var origs = mockSocketIO(io.Manager.prototype, this, {});
+	this.restore = function(){
+		restore(io.Manager.prototype, origs);
+	}
+};
+Server.prototype.on = function(event, cb){
+	console.log('server.on ' + event);
+	sub(this.events,  event, cb);
+};
+Server.prototype.emit = function(event, data, ack){
+	console.log('server.emit ' + event);
+	pub(this.subscribers, event, data)
+};
+function pub(pubsub, event, data){
+	console.log(' >>> pub ' + event);
+	var subscribers = pubsub[event] || [];
+	subscribers.forEach(function(subscriber){
+		subscriber(data);
+	});
+}
+function sub(pubsub, event, cb){
+	console.log(' <<< sub ' + event);
+	if (!pubsub[event]){
+		pubsub[event] = [];
+	}
+	pubsub[event].push(cb);
+}
+
 var MockedSocket = function(server){
 	this.server = server;
 };
@@ -22,7 +51,16 @@ MockedSocket.prototype = {
 		console.log('MockedSocket.once ...');
 	}
 };
-function mockSocketIO(server, options){
+
+function mockSocketIO(managerProto, server, options){
+	// We need to override `open` and `socket` methods:
+	var methods = ['open','socket'];
+	var origs = methods.map(function(name){
+		return {
+			name: name,
+			method: managerProto[name]
+		};
+	});
 	managerProto.open = managerProto.connect = function(){
 		if (this.__fixture__opened){
 			// io.socket makes sure connection is opened so `open` gets called twice.
@@ -40,40 +78,14 @@ function mockSocketIO(server, options){
 		console.log('MockedManager.prototype.socket ...');
 		return new MockedSocket(server);
 	};
-}
-function restore(){
-	methods.forEach(function(name){
-		managerProto[name] = origs[name];
-	});
+	return origs;
 }
 
-var Server = function(){
-	this.events = {};
-	this.subscribers = {};
-	mockSocketIO(this, {});
-};
-Server.prototype.on = function(event, cb){
-	console.log('server.on ' + event);
-	sub(this.events,  event, cb);
-};
-Server.prototype.emit = function(event, data, ack){
-	console.log('server.emit ' + event);
-	pub(this.subscribers, event, data)
-};
-
-function pub(pubsub, event, data){
-	console.log(' >>> pub ' + event);
-	var subscribers = pubsub[event] || [];
-	subscribers.forEach(function(subscriber){
-		subscriber(data);
+function restore(managerProto, origs){
+	console.log('Restore.');
+	origs.forEach(function(orig){
+		managerProto[orig.name] = orig.method;
 	});
-}
-function sub(pubsub, event, cb){
-	console.log(' <<< sub ' + event);
-	if (!pubsub[event]){
-		pubsub[event] = [];
-	}
-	pubsub[event].push(cb);
 }
 
 module.exports = {
