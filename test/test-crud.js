@@ -1,10 +1,8 @@
 var QUnit = require('steal-qunit');
 var fixtureSocket = require('./can-fixture-socket').Server;
 
-
 var mockServer;
 
-// Test fixture connection
 QUnit.module('can-fixture-socket', {
 	beforeEach: function(){
 		mockServer = new fixtureSocket.Server();
@@ -13,6 +11,8 @@ QUnit.module('can-fixture-socket', {
 		mockServer.reset();
 	}
 });
+
+// Test fixture connection
 QUnit.test('basic connection', function(){
 	//
 	// Mock server:
