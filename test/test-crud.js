@@ -131,7 +131,8 @@ QUnit.test('Test fixture store', function(){
 		destroyData: 'remove'
 	};
 
-	fixtureSocket.connectStore('messages', messagesStore, options);
+	// Connect fixture store to the mocked server service:
+	mockServer.connectStore('messages', messagesStore, options);
 	
 	//
 	// Test client:
