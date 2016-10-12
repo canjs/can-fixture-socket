@@ -1,5 +1,6 @@
 var QUnit = require('steal-qunit');
-var fixtureSocket = require('./can-fixture-socket').Server;
+var fixtureSocket = require('can-fixture-socket');
+var io = require('socket.io-client');
 
 var mockServer;
 
@@ -8,7 +9,6 @@ QUnit.module('can-fixture-socket', {
 		mockServer = new fixtureSocket.Server();
 	},
 	afterEach: function(){
-		mockServer.reset();
 	}
 });
 
@@ -24,7 +24,7 @@ QUnit.test('basic connection', function(){
 	//
 	// Test client:
 	//
-	QUnit.expects(2);
+	QUnit.expect(2);
 	var socket = io('localhost');
 	socket.on('connect', function(){
 		QUnit.ok(true, 'connected');
@@ -68,7 +68,7 @@ QUnit.test('CRUD service', function(){
 	//
 	// Test client:
 	//
-	QUnit.expects(5);
+	QUnit.expect(5);
 
 	var socket = io('localhost');
 

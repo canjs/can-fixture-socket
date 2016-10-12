@@ -57,7 +57,9 @@
     ],
     "npmAlgorithm": "flat"
   },
-  "dependencies": {},
+  "dependencies": {
+    "socket.io-client": "^1.5.0"
+  },
   "devDependencies": {
     "documentjs": "^0.4.2",
     "jshint": "^2.9.1",
