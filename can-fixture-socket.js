@@ -35,11 +35,11 @@ var MockedServer = function(io){
 		restoreManager(io.Manager.prototype, origs);
 	}
 };
-Server.prototype.on = function(event, cb){
+MockedServer.prototype.on = function(event, cb){
 	console.log('server.on ' + event);
 	sub(this.events,  event, cb);
 };
-Server.prototype.emit = function(event, data, ackFn){
+MockedServer.prototype.emit = function(event, data, ackFn){
 	console.log('server.emit ' + event);
 	pub(this.subscribers, event, data, ackFn)
 };
@@ -92,7 +92,6 @@ function sub(pubsub, event, cb){
  * Override Manager.prototype's method to work with the instantiated mocked server.
  * @param managerProto
  * @param server
- * @param options
  * @returns {Array}
  */
 function mockManager(managerProto, server){
@@ -136,7 +135,9 @@ function restoreManager(managerProto, origs){
  */
 function resetManagerCache(cache){
 	for (var i in cache){
-		delete cache[i];
+		if (cache.hasOwnProperty(i)){
+			delete cache[i];
+		}
 	}
 }
 
