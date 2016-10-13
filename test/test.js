@@ -126,12 +126,13 @@ QUnit.test('Test with fixture store', function(assert){
 		{id: 2, title: 'Two'}
 	], new canSet.Algebra({}));
 	
-	// #1: If we need to send some data back then we can use ACK callback for this:
+	// #1: directly process fixture.store:
 	mockServer.on('messages find', function(query, fn){
-		// fixture.store methods expect two arguments: (req, res)
-		// on error it calls res(403, err);
-		// on success it callse res(data).
-		// Format of returned data is {count: 3, data: [...]}
+		// Fixture.store methods expect two arguments `req` and `res`:
+		// - it grabs query from `req.data`;
+		// - on error it calls res(403, err);
+		// - on success it callse res(data).
+		// - format of returned data is {count: 3, data: [...]}
 		var req = {data: query};
 		var res = function(data, err){
 			if (err){
@@ -143,13 +144,15 @@ QUnit.test('Test with fixture store', function(assert){
 		messagesStore.getListData(req, res);
 	});
 	
-	//// #2: We can use a helper wrapper for event helper:
-	//mockServer.on('messages remove', fixtureSocket.toHandler(messagesStore.destroyData));
-	//
+	// #2: We can use a helper wrapper for event helper:
+	mockServer.on({
+		'messages get': fixtureSocket.toFixtureStoreHandler(messagesStore.getData)
+	});
+	
 	//// #3: We also can wrap fixture store to provide socket event ready methods:
 	//var socketMessagesStore = fixtureStore.wrapStore(messagesStore);
 	//mockServer.on({
-	//	'messages get': socketMessagesStore.getData,
+	//	'messages remove': socketMessagesStore.destroyData,
 	//	'messages create': socketMessagesStore.createData,
 	//	'messages update': socketMessagesStore.updateData
 	//});
@@ -164,17 +167,17 @@ QUnit.test('Test with fixture store', function(assert){
 		assert.ok(true, 'client connected to socket');
 		socket.emit('messages find', {}, function(err, data){
 			assert.equal(data.length, 2, 'emit messages find, ackCb received 2 items');
-			done();
 		});
 		socket.emit('messages get', {id: 1}, function(err, data){
-			assert.deepEqual(data, {id: 1, title: 'One'});
+			assert.deepEqual(data, {id: 1, title: 'One'}, 'emit messages get, ackCb received the item');
+			done();
 		});
-		socket.emit('messages update', {id: 1, title: 'OnePlus'}, function(err, data){
-			assert.deepEqual(data, {id: 1, title: 'OnePlus'});
-		});
-		socket.emit('messages get', {id: 999}, function(err, data){
-			assert.deepEqual(err, {id: 1, title: 'One'});
-		});
+		//socket.emit('messages update', {id: 1, title: 'OnePlus'}, function(err, data){
+		//	assert.deepEqual(data, {id: 1, title: 'OnePlus'});
+		//});
+		//socket.emit('messages get', {id: 999}, function(err, data){
+		//	assert.deepEqual(err, {id: 1, title: 'One'});
+		//});
 	});
 });
 

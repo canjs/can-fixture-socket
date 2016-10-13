@@ -35,9 +35,24 @@ var MockedServer = function(io){
 		restoreManager(io.Manager.prototype, origs);
 	}
 };
+/**
+ * Subscribe to events. 
+ * @param event Overloaded argument: either a string, then 2nd argument is cb; or an object with multiple events: {ev1: cb1, ev2: cb2, ...}.
+ * @param cb
+ */
 MockedServer.prototype.on = function(event, cb){
+	var self = this;
+	var events = {};
 	console.log('server.on ' + event);
-	sub(this.events,  event, cb);
+	if (typeof event === 'string'){
+		events[event] = cb;
+	}
+	if (typeof event === 'object'){
+		events = event;
+	}
+	Object.keys(events).forEach(function(name){
+		sub(self.events,  name, events[name]);
+	})
 };
 MockedServer.prototype.emit = function(event, data, ackFn){
 	console.log('server.emit ' + event);
@@ -141,8 +156,44 @@ function resetManagerCache(cache){
 	}
 }
 
+
+//TODO: separate the following out from here.
+
+/**
+ * Fixture.store helpers: toFixtureStoreHandler
+ * @param method {Function} A method like fixture.store method like getDataList.
+ *
+ * Fixture.store methods expect two arguments `req` and `res`:
+ * - it grabs query from `req.data`;
+ * - on error it calls res(403, err);
+ * - on success it callse res(data).
+ * - format of returned data is: 
+ *     - for getDataList: {count: 3, data: [{...},{...}, ...]}
+ *     - for getData: item object {...}
+ */
+function toFixtureStoreHandler(method){
+	return function(query, fn){
+		var req = {data: query};
+		
+		// TODO: use `extractResponse` from [can-fixture.core](https://github.com/canjs/can-fixture/blob/master/core.js#L271).
+		var res = function(data, err){
+			if (err){
+				fn(err)
+			} else {
+				// getListData format:
+				if (data.data){
+					data = data.data;
+				}
+				fn(null, data);
+			}
+		};
+		method(req, res);
+	}
+}
+
 module.exports = {
 	Server: MockedServer,
 	mockSocketManager: mockManager,
-	restoreManager: restoreManager
+	restoreManager: restoreManager,
+	toFixtureStoreHandler: toFixtureStoreHandler
 };
