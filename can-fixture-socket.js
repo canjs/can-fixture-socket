@@ -14,7 +14,7 @@ var Server = function(io){
 	// Override Manager's prototype:
 	var origs = mockSocketIO(io.Manager.prototype, this);
 	
-	// Attache a restore method with access to origs and prototype:
+	// Attach a restore method with access to origs and the prototype:
 	this.restore = function(){
 		restore(io.Manager.prototype, origs);
 	}
@@ -23,15 +23,15 @@ Server.prototype.on = function(event, cb){
 	console.log('server.on ' + event);
 	sub(this.events,  event, cb);
 };
-Server.prototype.emit = function(event, data, ack){
+Server.prototype.emit = function(event, data, ackFn){
 	console.log('server.emit ' + event);
-	pub(this.subscribers, event, data)
+	pub(this.subscribers, event, data, ackFn)
 };
-function pub(pubsub, event, data){
+function pub(pubsub, event, data, ackFn){
 	console.log(' >>> pub ' + event);
 	var subscribers = pubsub[event] || [];
 	subscribers.forEach(function(subscriber){
-		subscriber(data);
+		subscriber(data, ackFn);
 	});
 }
 function sub(pubsub, event, cb){
@@ -50,9 +50,9 @@ MockedSocket.prototype = {
 		console.log('MockedSocket.on ... ' + event);
 		sub(this._server.subscribers, event, cb);
 	},
-	emit: function(event, data, ack){
+	emit: function(event, data, ackFn){
 		console.log('MockedSocket.emit ...' + event);
-		pub(this._server.events, event, data);
+		pub(this._server.events, event, data, ackFn);
 	},
 	once: function(){
 		console.log('MockedSocket.once ...');

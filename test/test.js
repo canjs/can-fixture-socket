@@ -44,8 +44,7 @@ QUnit.test('basic connection', function(assert){
  * - on deleted send ACK with {success: true} and emit deleted event with the removed message id.
  */
 QUnit.noop = function(){};
-QUnit.noop('CRUD service', function(assert){
-	return;
+QUnit.test('CRUD service', function(assert){
 	console.log('Started test 2');
 	//
 	// Mock server:
@@ -64,7 +63,7 @@ QUnit.noop('CRUD service', function(assert){
 
 		mockServer.emit('messages updated', data);
 	});
-	mockServer.on('messages deleted', function(data, fn){
+	mockServer.on('messages delete', function(data, fn){
 		// send ack on the received event:
 		fn && fn({success: true});
 
@@ -75,36 +74,36 @@ QUnit.noop('CRUD service', function(assert){
 	// Test client:
 	//
 	var done = assert.async();
-	assert.expect(5);
+	assert.expect(6);
 
 	var socket = io('localhost');
 
 	socket.on('connect', function(){
 		socket.emit('messages create', {title: 'A new message'}, function(data){
 			// on ACK verify data:
-			assert.deepEqual(data, {id: 1});
+			assert.deepEqual(data, {id: 1, title: 'A new message'}, 'Emit a message to server');
 		});
 	});
 
 	socket.on('messages created', function(data){
-		assert.deepEqual(data, {title: 'A new message', id: 1});
+		assert.deepEqual(data, {title: 'A new message', id: 1}, 'Receive messages created');
 
 		socket.emit('messages update', {title: 'An updated message', id: 1}, function(data){
-			assert.deepEqual(data, {title: 'An updated message', id: 1});
+			assert.deepEqual(data, {title: 'An updated message', id: 1}, 'Emit messages update');
 		});
 
 		socket.emit('messages delete', {id: 1}, function(data){
-			assert.deepEqual(data, {success: true});
+			assert.deepEqual(data, {success: true}, 'Emit messages delete');
 		});
+	});
+
+	socket.on('messages updated', function(data) {
+		assert.deepEqual(data, {title: 'An updated message', id: 1}, 'Receive messages updated');
+	});
+
+	socket.on('messages deleted', function(data) {
+		assert.deepEqual(data, {id: 1}, 'Receive messages deleted');
 		done();
-	});
-
-	socket.on('message updated', function(data) {
-		QUnit.deepEqual(data, {title: 'An updated message', id: 1});
-	});
-
-	socket.on('message deleted', function(data) {
-		QUnit.deepEqual(data, {title: 'An updated message', id: 1});
 	});
 });
 
