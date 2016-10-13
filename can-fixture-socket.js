@@ -18,7 +18,7 @@
  * @param io Imported socket.io-client.
  * @constructor
  */
-var Server = function(io){
+var MockedServer = function(io){
 	// PubSub:
 	this.events = {};
 	this.subscribers = {};
@@ -28,11 +28,11 @@ var Server = function(io){
 	resetManagerCache(io.managers);
 	
 	// Override Manager's prototype:
-	var origs = mockSocketIO(io.Manager.prototype, this);
+	var origs = mockManager(io.Manager.prototype, this);
 	
 	// Attach a restore method with access to origs and the prototype:
 	this.restore = function(){
-		restore(io.Manager.prototype, origs);
+		restoreManager(io.Manager.prototype, origs);
 	}
 };
 Server.prototype.on = function(event, cb){
@@ -95,7 +95,7 @@ function sub(pubsub, event, cb){
  * @param options
  * @returns {Array}
  */
-function mockSocketIO(managerProto, server){
+function mockManager(managerProto, server){
 	// We need to override `open` and `socket` methods:
 	var methods = ['open','socket'];
 	var origs = methods.map(function(name){
@@ -123,7 +123,7 @@ function mockSocketIO(managerProto, server){
  * @param managerProto
  * @param origs
  */
-function restore(managerProto, origs){
+function restoreManager(managerProto, origs){
 	console.log('Restore.');
 	origs.forEach(function(orig){
 		managerProto[orig.name] = orig.method;
@@ -141,7 +141,7 @@ function resetManagerCache(cache){
 }
 
 module.exports = {
-	Server: Server,
-	mockSocketIO: mockSocketIO,
-	restoreSocketIO: restore
+	Server: MockedServer,
+	mockSocketManager: mockManager,
+	restoreManager: restoreManager
 };
