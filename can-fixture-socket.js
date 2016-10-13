@@ -191,9 +191,18 @@ function toFixtureStoreHandler(method){
 	}
 }
 
+function wrapFixtureStore(fixtureStore){
+	var methods = ['getListData', 'getData', 'updateData', 'createData', 'destroyData'];
+	return methods.reduce(function(wrappedStore, method){
+		wrappedStore[method] = toFixtureStoreHandler(fixtureStore[method]);
+		return wrappedStore;
+	}, {});
+}
+
 module.exports = {
 	Server: MockedServer,
 	mockSocketManager: mockManager,
 	restoreManager: restoreManager,
-	toFixtureStoreHandler: toFixtureStoreHandler
+	toFixtureStoreHandler: toFixtureStoreHandler,
+	wrapFixtureStore: wrapFixtureStore
 };

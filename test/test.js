@@ -123,7 +123,8 @@ QUnit.test('Test with fixture store', function(assert){
 	
 	var messagesStore = fixture.store([
 		{id: 1, title: 'One'},
-		{id: 2, title: 'Two'}
+		{id: 2, title: 'Two'},
+		{id: 3, title: 'Two'}
 	], new canSet.Algebra({}));
 	
 	// #1: directly process fixture.store:
@@ -149,13 +150,13 @@ QUnit.test('Test with fixture store', function(assert){
 		'messages get': fixtureSocket.toFixtureStoreHandler(messagesStore.getData)
 	});
 	
-	//// #3: We also can wrap fixture store to provide socket event ready methods:
-	//var socketMessagesStore = fixtureStore.wrapStore(messagesStore);
-	//mockServer.on({
-	//	'messages remove': socketMessagesStore.destroyData,
-	//	'messages create': socketMessagesStore.createData,
-	//	'messages update': socketMessagesStore.updateData
-	//});
+	// #3: We also can wrap fixture store to provide socket event ready methods:
+	var socketMessagesStore = fixtureSocket.wrapFixtureStore(messagesStore);
+	mockServer.on({
+		'messages remove': socketMessagesStore.destroyData,
+		'messages create': socketMessagesStore.createData,
+		'messages update': socketMessagesStore.updateData
+	});
 
 	//
 	// Test client:
@@ -166,18 +167,18 @@ QUnit.test('Test with fixture store', function(assert){
 	socket.on('connect', function(){
 		assert.ok(true, 'client connected to socket');
 		socket.emit('messages find', {}, function(err, data){
-			assert.equal(data.length, 2, 'emit messages find, ackCb received 2 items');
+			assert.equal(data.length, 3, 'emit("messages find"): ackCb received 3 items');
 		});
 		socket.emit('messages get', {id: 1}, function(err, data){
-			assert.deepEqual(data, {id: 1, title: 'One'}, 'emit messages get, ackCb received the item');
+			assert.deepEqual(data, {id: 1, title: 'One'}, 'emit("messages get"): ackCb received the item');
+		});
+		socket.emit('messages update', {id: 2, title: 'TwoPlus'}, function(err, data){
+			assert.deepEqual(data, {id: 2, title: 'TwoPlus'}, 'emit("messages update"): received the updated item');
+		});
+		socket.emit('messages get', {id: 999}, function(err, data){
+			assert.deepEqual(err, {error: 404, message: 'no data'}, 'emit("messages get"): received 404 when geting non-existent item id');
 			done();
 		});
-		//socket.emit('messages update', {id: 1, title: 'OnePlus'}, function(err, data){
-		//	assert.deepEqual(data, {id: 1, title: 'OnePlus'});
-		//});
-		//socket.emit('messages get', {id: 999}, function(err, data){
-		//	assert.deepEqual(err, {id: 1, title: 'One'});
-		//});
 	});
 });
 
