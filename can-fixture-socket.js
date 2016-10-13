@@ -15,7 +15,7 @@
  * The mocked socket.io-server. On instantiation we:
  *   - clear io.managers which is a cache of Manager instances;
  *   - override Manager.prototype to work with current instance of the mocked server. 
- * @param io
+ * @param io Imported socket.io-client.
  * @constructor
  */
 var Server = function(io){
@@ -43,24 +43,10 @@ Server.prototype.emit = function(event, data, ackFn){
 	console.log('server.emit ' + event);
 	pub(this.subscribers, event, data, ackFn)
 };
-function pub(pubsub, event, data, ackFn){
-	console.log(' >>> pub ' + event);
-	var subscribers = pubsub[event] || [];
-	subscribers.forEach(function(subscriber){
-		subscriber(data, ackFn);
-	});
-}
-function sub(pubsub, event, cb){
-	console.log(' <<< sub ' + event);
-	if (!pubsub[event]){
-		pubsub[event] = [];
-	}
-	pubsub[event].push(cb);
-}
 
 /**
  * Manager instantiates Socket. We mock Socket's methods to work with the mocked server instance.
- * @param server
+ * @param server Mocked server.
  * @constructor
  */
 var MockedSocket = function(server){
@@ -79,6 +65,28 @@ MockedSocket.prototype = {
 		console.log('MockedSocket.once ...');
 	}
 };
+
+/**
+ * PubSub helpers.
+ * @param pubsub A list of pubs or subs.
+ * @param event {String} A name for a pubsub item (e.g. a name of event that we emit or subscribe to).
+ * @param data
+ * @param ackFn {Function} A acknowledgement function, is used for WebSocket ACK.
+ */
+function pub(pubsub, event, data, ackFn){
+	console.log(' >>> pub ' + event);
+	var subscribers = pubsub[event] || [];
+	subscribers.forEach(function(subscriber){
+		subscriber(data, ackFn);
+	});
+}
+function sub(pubsub, event, cb){
+	console.log(' <<< sub ' + event);
+	if (!pubsub[event]){
+		pubsub[event] = [];
+	}
+	pubsub[event].push(cb);
+}
 
 /**
  * Override Manager.prototype's method to work with the instantiated mocked server.
