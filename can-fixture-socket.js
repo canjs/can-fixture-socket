@@ -1,8 +1,10 @@
 /**
- * Summary: `io` creates an instance of `io.Manager` for a url and stores it in cache of managers `io.managers`.
- * One manager can create several sockets. If `io` is called with the same URL twice it will lookup Manager in the cache.
+ * Summary: `io(url)` creates an instance of `io.Manager` for the given url and stores it in cache of managers `io.managers`.
+ * If `io` is called with the same URL several times it will lookup Manager in the cache.
+ * One manager creates one physical (transport) connection and can create several "virtual" connections within
+ * the transport connection.
  * Manager has two main methods: `open` (alias `connect`) and `socket`. The first one establishes a transport connection
- * (e.g. http://localhost), the latter creates a socket.io connection (e.g. http://localhost/users).
+ * (e.g. http://localhost), the second one creates a socket.io connection (e.g. http://localhost/users).
  * 
  * To fixture socket.io we need to:
  *   - mock a socket server;
