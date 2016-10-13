@@ -43,7 +43,6 @@ QUnit.test('basic connection', function(assert){
  * - on created / updated message send ACK with message data and emit created / updated event.
  * - on deleted send ACK with {success: true} and emit deleted event with the removed message id.
  */
-QUnit.noop = function(){};
 QUnit.test('CRUD service', function(assert){
 	console.log('Started test 2');
 	//
@@ -120,8 +119,7 @@ QUnit.test('CRUD service', function(assert){
  *     - send("messages::create", data, query)
  *     - send("messages::update", id, data, query)
  */
-QUnit.noop('Test fixture store', function(assert){
-	return;
+QUnit.test('Test fixture store', function(assert){
 	console.log('Started test 3');
 	//
 	// Mock server

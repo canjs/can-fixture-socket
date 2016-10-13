@@ -1,6 +1,20 @@
 /**
- * Manager is created for a url.
- * One manager can create several sockets.
+ * Summary: `io` creates an instance of `io.Manager` for a url and stores it in cache of managers `io.managers`.
+ * One manager can create several sockets. If `io` is called with the same URL twice it will lookup Manager in the cache.
+ * Manager has two main methods: `open` (alias `connect`) and `socket`. The first one establishes a transport connection
+ * (e.g. http://localhost), the latter creates a socket.io connection (e.g. http://localhost/users).
+ * 
+ * To fixture socket.io we need to:
+ *   - mock a socket server;
+ *   - override io.Manager.prototype methods to work with the mocked server.
+ */
+
+/**
+ * The mocked socket.io-server. On instantiation we:
+ *   - clear io.managers which is a cache of Manager instances;
+ *   - override Manager.prototype to work with current instance of the mocked server. 
+ * @param io
+ * @constructor
  */
 var Server = function(io){
 	// PubSub:
@@ -42,6 +56,11 @@ function sub(pubsub, event, cb){
 	pubsub[event].push(cb);
 }
 
+/**
+ * Manager instantiates Socket. We mock Socket's methods to work with the mocked server instance.
+ * @param server
+ * @constructor
+ */
 var MockedSocket = function(server){
 	this._server = server;
 };
@@ -76,13 +95,6 @@ function mockSocketIO(managerProto, server){
 		};
 	});
 	managerProto.open = managerProto.connect = function(){
-		// TODO: this is not necessary anymore since we are mocking the Socket.
-		if (this.__fixture__opened){
-			// io.socket makes sure connection is opened so `open` gets called twice.
-			console.log('already opened');
-			return;
-		}
-		this.__fixture__opened = true;
 		console.log('MockedManager.prototype.open or connect ... arguments:', arguments);
 		setTimeout(function(){
 			pub(server.subscribers, 'connect');
