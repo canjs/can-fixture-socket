@@ -1,13 +1,20 @@
-var io = require('socket.io-client');
-
 /**
  * Manager is created for a url.
  * One manager can create several sockets.
  */
-var Server = function(){
+var Server = function(io){
+	// PubSub:
 	this.events = {};
 	this.subscribers = {};
-	var origs = mockSocketIO(io.Manager.prototype, this, {});
+	
+	// SocketIO stores an instantiated Manager in cache to reuse it for the same URL.
+	// Reset cache of managers since we override Manager prototype to work with this particular instance of the mocked server:
+	resetManagerCache(io.managers);
+	
+	// Override Manager's prototype:
+	var origs = mockSocketIO(io.Manager.prototype, this);
+	
+	// Attache a restore method with access to origs and prototype:
 	this.restore = function(){
 		restore(io.Manager.prototype, origs);
 	}
@@ -36,23 +43,30 @@ function sub(pubsub, event, cb){
 }
 
 var MockedSocket = function(server){
-	this.server = server;
+	this._server = server;
 };
 MockedSocket.prototype = {
 	on: function(event, cb){
 		console.log('MockedSocket.on ... ' + event);
-		sub(this.server.subscribers, event, cb);
+		sub(this._server.subscribers, event, cb);
 	},
 	emit: function(event, data, ack){
 		console.log('MockedSocket.emit ...' + event);
-		pub(this.server.events, event, data);
+		pub(this._server.events, event, data);
 	},
 	once: function(){
 		console.log('MockedSocket.once ...');
 	}
 };
 
-function mockSocketIO(managerProto, server, options){
+/**
+ * Override Manager.prototype's method to work with the instantiated mocked server.
+ * @param managerProto
+ * @param server
+ * @param options
+ * @returns {Array}
+ */
+function mockSocketIO(managerProto, server){
 	// We need to override `open` and `socket` methods:
 	var methods = ['open','socket'];
 	var origs = methods.map(function(name){
@@ -62,6 +76,7 @@ function mockSocketIO(managerProto, server, options){
 		};
 	});
 	managerProto.open = managerProto.connect = function(){
+		// TODO: this is not necessary anymore since we are mocking the Socket.
 		if (this.__fixture__opened){
 			// io.socket makes sure connection is opened so `open` gets called twice.
 			console.log('already opened');
@@ -81,11 +96,26 @@ function mockSocketIO(managerProto, server, options){
 	return origs;
 }
 
+/**
+ * Restore Manager prototype.
+ * @param managerProto
+ * @param origs
+ */
 function restore(managerProto, origs){
 	console.log('Restore.');
 	origs.forEach(function(orig){
 		managerProto[orig.name] = orig.method;
 	});
+}
+
+/**
+ * We need to reset cache of Managers so that the new mocked server would create a new Manager for the same URL.
+ * @param cache
+ */
+function resetManagerCache(cache){
+	for (var i in cache){
+		delete cache[i];
+	}
 }
 
 module.exports = {
