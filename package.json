@@ -61,15 +61,17 @@
     "socket.io-client": "^1.5.0"
   },
   "devDependencies": {
-    "documentjs": "^0.4.2",
-    "jshint": "^2.9.1",
+    "can-fixture": "^0.4.0-pre.17",
+    "can-set": "^0.6.0-pre.11",
     "cssify": "^0.6.0",
+    "documentjs": "^0.4.2",
+    "done-serve": "^0.3.0-pre.0",
+    "donejs-cli": "^0.10.0-pre.0",
+    "generator-donejs": "^0.10.0-pre.0",
+    "jshint": "^2.9.1",
     "steal": "^0.16.0",
     "steal-qunit": "^0.1.1",
     "steal-tools": "^0.16.0",
-    "testee": "^0.2.4",
-    "generator-donejs": "^0.10.0-pre.0",
-    "donejs-cli": "^0.10.0-pre.0",
-    "done-serve": "^0.3.0-pre.0"
+    "testee": "^0.2.4"
   }
 }

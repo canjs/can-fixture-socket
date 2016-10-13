@@ -1,8 +1,11 @@
 var QUnit = require('steal-qunit');
 var fixtureSocket = require('can-fixture-socket');
+var fixture = require('can-fixture');
+var canSet = require("can-set");
 var io = require('socket.io-client');
 
 var mockServer;
+QUnit.noop = function(){};
 
 QUnit.module('can-fixture-socket', {
 	beforeEach: function(){
@@ -38,7 +41,7 @@ QUnit.test('basic connection', function(assert){
 });
 
 /**
- * Emulate a low level CRUD API.
+ * Ex 1. Emulate a low level CRUD API.
  * Let the protocol be:
  * - on created / updated message send ACK with message data and emit created / updated event.
  * - on deleted send ACK with {success: true} and emit deleted event with the removed message id.
@@ -107,21 +110,11 @@ QUnit.test('CRUD service', function(assert){
 });
 
 /**
- * Ex. 2. Make a fixture store with data.
+ * Ex 2. Make a fixture store with data.
  * Emulate CRUD operations.
  * Provide a way to define the CRUD methods, e.g. internally use can-connect dataUrl and map them to FeathersJS style.
- *
- * FeathersJS websocket protocol:
- *   event format: "<path>::<method>"
- *   e.g.
- *     - send("messages::find", query)
- *     - send("messages::get", id, query)
- *     - send("messages::create", data, query)
- *     - send("messages::update", id, data, query)
  */
-QUnit.test('Test fixture store', function(assert){
-	return;
-	console.log('Started test 3');
+QUnit.test('Test with fixture store', function(assert){
 	//
 	// Mock server
 	//
@@ -131,23 +124,35 @@ QUnit.test('Test fixture store', function(assert){
 	var messagesStore = fixture.store([
 		{id: 1, title: 'One'},
 		{id: 2, title: 'Two'}
-	]);
+	], new canSet.Algebra({}));
 	
 	// #1: If we need to send some data back then we can use ACK callback for this:
 	mockServer.on('messages find', function(query, fn){
-		messagesStore.getListData(query).then(fn);
+		// fixture.store methods expect two arguments: (req, res)
+		// on error it calls res(403, err);
+		// on success it callse res(data).
+		// Format of returned data is {count: 3, data: [...]}
+		var req = {data: query};
+		var res = function(data, err){
+			if (err){
+				fn(err)
+			} else {
+				fn(null, data.data);
+			}
+		};
+		messagesStore.getListData(req, res);
 	});
 	
-	// #2: We can use a helper wrapper for event helper:
-	mockServer.on('messages remove', fixtureSocket.toHandler(messagesStore.destroyData));
-	
-	// #3: We also can wrap fixture store to provide socket event ready methods:
-	var socketMessagesStore = fixtureStore.wrapStore(messagesStore);
-	mockServer.on({
-		'messages get': socketMessagesStore.getData,
-		'messages create': socketMessagesStore.createData,
-		'messages update': socketMessagesStore.updateData
-	});
+	//// #2: We can use a helper wrapper for event helper:
+	//mockServer.on('messages remove', fixtureSocket.toHandler(messagesStore.destroyData));
+	//
+	//// #3: We also can wrap fixture store to provide socket event ready methods:
+	//var socketMessagesStore = fixtureStore.wrapStore(messagesStore);
+	//mockServer.on({
+	//	'messages get': socketMessagesStore.getData,
+	//	'messages create': socketMessagesStore.createData,
+	//	'messages update': socketMessagesStore.updateData
+	//});
 
 	//
 	// Test client:
@@ -156,15 +161,29 @@ QUnit.test('Test fixture store', function(assert){
 	var socket = io('localhost');
 
 	socket.on('connect', function(){
-		socket.emit('messages find', {}, function(data){
-			QUnit.equal(data.length, 2);
+		assert.ok(true, 'client connected to socket');
+		socket.emit('messages find', {}, function(err, data){
+			assert.equal(data.length, 2, 'emit messages find, ackCb received 2 items');
+			done();
 		});
-		socket.emit('messages get', {id: 1}, function(data){
-			QUnit.deepEqual(data, {id: 1, title: 'One'});
+		socket.emit('messages get', {id: 1}, function(err, data){
+			assert.deepEqual(data, {id: 1, title: 'One'});
 		});
-		socket.emit('messages update', {id: 1, title: 'OnePlus'}, function(data){
-			QUnit.deepEqual(data, {id: 1, title: 'OnePlus'});
+		socket.emit('messages update', {id: 1, title: 'OnePlus'}, function(err, data){
+			assert.deepEqual(data, {id: 1, title: 'OnePlus'});
 		});
-		done();
+		socket.emit('messages get', {id: 999}, function(err, data){
+			assert.deepEqual(err, {id: 1, title: 'One'});
+		});
 	});
 });
+
+/**
+ * Ex 3. FeathersJS websocket protocol:
+ *   event format: "<path>::<method>"
+ *   e.g.
+ *     - socket.emit("messages::find", query, cb)
+ *     - socket.emit("messages::get", id, query, cb) where cb = function(error, data){...}
+ *     - socket.emit("messages::create", data, query, cb)
+ *     - socket.emit("messages::update", id, data, query, cb)
+ */
