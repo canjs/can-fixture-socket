@@ -176,7 +176,7 @@ QUnit.test('Test with fixture store', function(assert){
 			assert.deepEqual(data, {id: 2, title: 'TwoPlus'}, 'emit("messages update"): received the updated item');
 		});
 		socket.emit('messages get', {id: 999}, function(err, data){
-			assert.deepEqual(err, {error: 404, message: 'no data'}, 'emit("messages get"): received 404 when geting non-existent item id');
+			assert.deepEqual(err, {error: 404, message: 'no data'}, 'emit("messages get"): received 404 when looking for a non-existent item id');
 			done();
 		});
 	});
@@ -191,7 +191,7 @@ QUnit.test('Test with fixture store', function(assert){
  *     socket.emit("messages::get", id, query, cb)
  *     socket.emit("messages::create", data, query, cb)
  *     socket.emit("messages::update", id, data, query, cb)
- *     socket.emit("messages::destroy", id, data, query, cb)
+ *     socket.emit("messages::remove", id, data, query, cb)
  *  where cb = function(error, data){...} is socket's ACK callback.
  *  FeathersJS client service provides a promise.
  */
@@ -205,13 +205,7 @@ QUnit.test('FeathersJS protocol', function(){
 		{id: 3, title: 'Two'}
 	], new canSet.Algebra({}));
 	
-	var socketMessagesStore = fixtureSocket.wrapFeathersStore(messagesStore);
-	
-	mockServer.on({
-		'messages::remove': socketMessagesStore.destroyData,
-		'messages::create': socketMessagesStore.createData,
-		'messages::update': socketMessagesStore.updateData
-	});
+	fixtureSocket.feathersConnectStoreToServer('messages', messagesStore, mockServer);
 	
 	//
 	// Prepare FeathersJS client app
@@ -236,7 +230,7 @@ QUnit.test('FeathersJS protocol', function(){
 	messagesService.update(2, {title: 'TwoPlus'}).then(function(data){
 		assert.deepEqual(data, {id: 2, title: 'Two'}, 'update should update an item');
 	});
-	messagesService.destroy(2, {title: 'TwoPlus'}).then(function(data){
+	messagesService.remove(2, {title: 'TwoPlus'}).then(function(data){
 		assert.deepEqual(data, {id: 2, title: 'Two'}, 'update should update an item')
 	});
 	messagesService.get(2).catch(function(err){

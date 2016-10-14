@@ -33,6 +33,7 @@ var MockedServer = function(io){
 	// Attach a restore method with access to origs and the prototype:
 	this.restore = function(){
 		restoreManager(io.Manager.prototype, origs);
+		resetManagerCache(io.managers);
 	}
 };
 /**
@@ -209,8 +210,16 @@ function wrapFixtureStore(fixtureStore){
  * @param fixtureStore
  * @returns {*}
  */
-function wrapFeathersStore(fixtureStore){
-	return;
+function feathersConnectStoreToServer(serviceName, fixtureStore, mockServer){
+	var wrappedStore = wrapFixtureStore(messagesStore);
+	mockServer.on(serviceName + '::find', function(query, fn){
+		//wrappedStore.getListData();
+	});
+	mockServer.on({
+		'messages::remove': feathersStore.destroyData,
+		'messages::create': feathersStore.createData,
+		'messages::update': feathersStore.updateData
+	});
 }
 
 module.exports = {
@@ -218,5 +227,6 @@ module.exports = {
 	mockSocketManager: mockManager,
 	restoreManager: restoreManager,
 	toFixtureStoreHandler: toFixtureStoreHandler,
-	wrapFixtureStore: wrapFixtureStore
+	wrapFixtureStore: wrapFixtureStore,
+	feathersConnectStoreToServer: feathersConnectStoreToServer
 };
