@@ -191,12 +191,26 @@ function toFixtureStoreHandler(method){
 	}
 }
 
+/**
+ * Wraps all methods of fixture.store into socket ack handler.
+ * @param fixtureStore
+ * @returns {*}
+ */
 function wrapFixtureStore(fixtureStore){
 	var methods = ['getListData', 'getData', 'updateData', 'createData', 'destroyData'];
 	return methods.reduce(function(wrappedStore, method){
 		wrappedStore[method] = toFixtureStoreHandler(fixtureStore[method]);
 		return wrappedStore;
 	}, {});
+}
+
+/**
+ * Wraps fixture.store considering FeathersJS arguments format.
+ * @param fixtureStore
+ * @returns {*}
+ */
+function wrapFeathersStore(fixtureStore){
+	return;
 }
 
 module.exports = {

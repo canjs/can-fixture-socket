@@ -184,10 +184,64 @@ QUnit.test('Test with fixture store', function(assert){
 
 /**
  * Ex 3. FeathersJS websocket protocol:
- *   event format: "<path>::<method>"
+ *   - event name format: "<path>::<method>"
+ *   - arguments: [<id>], [<data>], <query>, <cb>
  *   e.g.
- *     - socket.emit("messages::find", query, cb)
- *     - socket.emit("messages::get", id, query, cb) where cb = function(error, data){...}
- *     - socket.emit("messages::create", data, query, cb)
- *     - socket.emit("messages::update", id, data, query, cb)
+ *     socket.emit("messages::find", query, cb)
+ *     socket.emit("messages::get", id, query, cb)
+ *     socket.emit("messages::create", data, query, cb)
+ *     socket.emit("messages::update", id, data, query, cb)
+ *     socket.emit("messages::destroy", id, data, query, cb)
+ *  where cb = function(error, data){...} is socket's ACK callback.
+ *  FeathersJS client service provides a promise.
  */
+QUnit.test('FeathersJS protocol', function(){
+	//
+	// Mock server
+	//
+	var messagesStore = fixture.store([
+		{id: 1, title: 'One'},
+		{id: 2, title: 'Two'},
+		{id: 3, title: 'Two'}
+	], new canSet.Algebra({}));
+	
+	var socketMessagesStore = fixtureSocket.wrapFeathersStore(messagesStore);
+	
+	mockServer.on({
+		'messages::remove': socketMessagesStore.destroyData,
+		'messages::create': socketMessagesStore.createData,
+		'messages::update': socketMessagesStore.updateData
+	});
+	
+	//
+	// Prepare FeathersJS client app
+	//
+	var app;
+	var messagesService = app.service('messages');
+
+	//
+	// Test client:
+	//
+	var done = assert.async();
+
+	messagesService.find({}).then(function(data){
+		assert.equal(data.length, 3, 'find should receive 3 items');
+	});
+	messagesService.get(1).then(function(data){
+		assert.deepEqual(data, {id: 1, title: 'One'}, 'get should receive an item');
+	});
+	messagesService.create({title: 'Four'}).then(function(data){
+		assert.equal(data.title, 'Four', 'create should add an new item');
+	});
+	messagesService.update(2, {title: 'TwoPlus'}).then(function(data){
+		assert.deepEqual(data, {id: 2, title: 'Two'}, 'update should update an item');
+	});
+	messagesService.destroy(2, {title: 'TwoPlus'}).then(function(data){
+		assert.deepEqual(data, {id: 2, title: 'Two'}, 'update should update an item')
+	});
+	messagesService.get(2).catch(function(err){
+		assert.deepEqual(err, {status: 404, message: 'No data'}, 'update should update an item')
+		done();
+	});
+	
+});
