@@ -37,6 +37,7 @@
  * 
  */
 
+var wrapFixtureStore = require('./store').wrapFixtureStore;
 
 /**
  * Wraps fixture.store considering FeathersJS arguments format.
@@ -49,65 +50,39 @@
  */
 function connectFeathersStoreToServer(serviceName, fixtureStore, mockServer){
 	var wrappedStore = wrapFixtureStore(fixtureStore);
-	mockServer.on(serviceName + '::find', function(query, fn){
-		wrappedStore.getListData(query, function(err, data){
-			if (err){
-				fn(err);
-			} else {
-				// fixture.store.getListData: {count, limit, offset, data}
-				// feathers.find:             {total, limit, skip, data}
-				fn(null, {
-					total: data.count,
-					limit: data.limit,
-					skip: data.offset,
-					data: data.data
-				})
-			}
-		})
-	});
-	mockServer.on(serviceName + '::get', function(query, fn){
-		wrappedStore.getData(query, function(err, data){
-			if (err){
-				fn(err);
-			} else {
-				// fixture.store.getListData: {count, limit, offset, data}
-				// feathers.find:             {total, limit, skip, data}
-				fn(null, {
-					total: data.count,
-					limit: data.limit,
-					skip: data.offset,
-					data: data.data
-				})
-			}
-		})
-	});
-	mockServer.on({
-		'messages::remove': wrappedStore.destroyData,
-		'messages::create': wrappedStore.createData,
-		'messages::update': wrappedStore.updateData
-	});
+	mockServer.on(serviceName + '::find', toFeathersDataHandler(wrappedStore.getListData, null, toFeathersFind));
+	mockServer.on(serviceName + '::get', toFeathersDataHandler(wrappedStore.getData, wrapToId, null));
+	
+	// fixture.store.destroyData returns back the passed set, e.g. {id: 1}
+	// https://github.com/canjs/can-connect/blob/master/data/memory-cache/memory-cache.js#L416
+	// Feathers.remove returns back the whole object.
+	mockServer.on(serviceName + '::remove', toFeathersDataHandler(wrappedStore.destroyData, wrapToId, null));
+	
+	//mockServer.on(serviceName + '::create', toFeathersDataHandler(wrappedStore.createData, null, null));
+	//mockServer.on(serviceName + '::update', toFeathersDataHandler(wrappedStore.createData, null, null));
 }
 
-function toFeathersData(method){
+function toFeathersDataHandler(method, queryTransformer, dataTransformer){
 	return function(query, fn){
+		query = queryTransformer ? queryTransformer(query) : query;
 		method(query, function(err, data){
 			if (err){
 				fn(err);
 			} else {
-				// fixture.store.getListData: {count, limit, offset, data}
-				// feathers.find:             {total, limit, skip, data}
-				fn(null, {
-					total: data.count,
-					limit: data.limit,
-					skip: data.offset,
-					data: data.data
-				})
+				data = dataTransformer ? dataTransformer(data) : data;
+				fn(null, data);
 			}
 		})
 	}
 }
 
-function toFeathersGet(data){
+function wrapToId(query){
+	return {id: query};
+}
+
+// fixture.store.getListData: {count, limit, offset, data}
+// feathers.find:             {total, limit, skip, data}
+function toFeathersFind(data){
 	return {
 		total: data.count,
 		limit: data.limit,
@@ -116,4 +91,6 @@ function toFeathersGet(data){
 	};
 }
 
-module.export.connectFeathersStoreToServer = connectFeathersStoreToServer;
+module.exports = {
+	connectFeathersStoreToServer: connectFeathersStoreToServer
+};

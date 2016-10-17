@@ -12,7 +12,7 @@ var extractResponse = require('can-fixture/core').extractResponse;
  *     - for getDataList: {count: <number>, limit: <number>, offset: <number> , data: [{...},{...}, ...]}
  *     - for getData: item object {...}
  */
-function toFixtureStoreHandler(method){
+function toFixtureStoreHandler(method, methodName){
 	return function(query, fn){
 		var req = {data: query};
 		var res = function(){
@@ -23,6 +23,10 @@ function toFixtureStoreHandler(method){
 				fn(response[1]);
 			}
 		};
+		console.log('Calling methodName ' + methodName);
+		if (methodName === 'destroyData'){
+			debugger;
+		}
 		method(req, res);
 	}
 }
@@ -35,7 +39,7 @@ function toFixtureStoreHandler(method){
 function wrapFixtureStore(fixtureStore){
 	var methods = ['getListData', 'getData', 'updateData', 'createData', 'destroyData'];
 	return methods.reduce(function(wrappedStore, method){
-		wrappedStore[method] = toFixtureStoreHandler(fixtureStore[method]);
+		wrappedStore[method] = toFixtureStoreHandler(fixtureStore[method], method);
 		return wrappedStore;
 	}, {});
 }
@@ -43,5 +47,4 @@ function wrapFixtureStore(fixtureStore){
 module.exports = {
 	toFixtureStoreHandler: toFixtureStoreHandler,
 	wrapFixtureStore: wrapFixtureStore,
-	feathersConnectStoreToServer: feathersConnectStoreToServer
 };

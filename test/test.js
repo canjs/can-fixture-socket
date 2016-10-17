@@ -197,7 +197,72 @@ QUnit.test('Test with fixture store', function(assert){
  *  where cb = function(error, data){...} is socket's ACK callback.
  *  FeathersJS client service provides a promise.
  */
-QUnit.test('FeathersJS protocol', function(){
+QUnit.test('FeathersJS protocol', function(assert){
+	//
+	// Mock server
+	//
+	var messagesStore = fixture.store([
+		{id: 1, title: 'One'},
+		{id: 2, title: 'Two'},
+		{id: 3, title: 'Three'}
+	], new canSet.Algebra({}));
+	
+	fixtureSocket.connectFeathersStoreToServer('messages', messagesStore, mockServer);
+	
+	//
+	// Prepare FeathersJS client app
+	//
+	//var app;
+	//var messagesService = app.service('messages');
+
+	//
+	// Test client:
+	//
+	var done = assert.async();
+	var socket = io('localhost');
+
+	socket.on('connect', function() {
+		assert.ok(true, 'client connected to socket');
+		socket.emit('messages::find', {}, function (err, response) {
+			assert.equal(response.total, 3, 'emit("messages::find"): ackCb response.total 3 items');
+		});
+		socket.emit('messages::get', 1, function (err, data) {
+			assert.deepEqual(data, {id: 1, title: 'One'}, 'emit("messages::get"): ackCb received 1 item');
+		});
+		socket.emit('messages::remove', 1, function (err, data) {
+			assert.deepEqual(data, {id: 1, title: 'One'}, 'emit("messages::remove"): ackCb received the removed item');
+			done();
+		});
+	});
+	
+	
+    //
+	//messagesService.find({}).then(function(data){
+	//	assert.equal(data.length, 3, 'find should receive 3 items');
+	//});
+	//messagesService.get(1).then(function(data){
+	//	assert.deepEqual(data, {id: 1, title: 'One'}, 'get should receive an item');
+	//});
+	//messagesService.create({title: 'Four'}).then(function(data){
+	//	assert.equal(data.title, 'Four', 'create should add an new item');
+	//});
+	//messagesService.update(2, {title: 'TwoPlus'}).then(function(data){
+	//	assert.deepEqual(data, {id: 2, title: 'Two'}, 'update should update an item');
+	//});
+	//messagesService.remove(2, {title: 'TwoPlus'}).then(function(data){
+	//	assert.deepEqual(data, {id: 2, title: 'Two'}, 'update should update an item')
+	//});
+	//messagesService.get(2).catch(function(err){
+	//	assert.deepEqual(err, {status: 404, message: 'No data'}, 'update should update an item')
+	//	done();
+	//});
+	
+});
+
+/**
+ * Test Feathers REST service.
+ */
+QUnit.noop('FeathersJS REST service', function(assert){
 	//
 	// Mock server
 	//
@@ -207,7 +272,7 @@ QUnit.test('FeathersJS protocol', function(){
 		{id: 3, title: 'Two'}
 	], new canSet.Algebra({}));
 	
-	fixtureSocket.feathersConnectStoreToServer('messages', messagesStore, mockServer);
+	fixtureSocket.connectFeathersStoreToServer('messages', messagesStore, mockServer);
 	
 	//
 	// Prepare FeathersJS client app
@@ -219,7 +284,8 @@ QUnit.test('FeathersJS protocol', function(){
 	// Test client:
 	//
 	var done = assert.async();
-
+	var socket = io('localhost');
+    
 	messagesService.find({}).then(function(data){
 		assert.equal(data.length, 3, 'find should receive 3 items');
 	});
@@ -239,5 +305,4 @@ QUnit.test('FeathersJS protocol', function(){
 		assert.deepEqual(err, {status: 404, message: 'No data'}, 'update should update an item')
 		done();
 	});
-	
 });
