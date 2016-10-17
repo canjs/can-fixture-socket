@@ -58,10 +58,9 @@
     "npmAlgorithm": "flat"
   },
   "dependencies": {
-    "socket.io-client": "^1.5.0"
+    "can-fixture": "^0.4.0-pre.17"
   },
   "devDependencies": {
-    "can-fixture": "^0.4.0-pre.17",
     "can-set": "^0.6.0-pre.11",
     "cssify": "^0.6.0",
     "documentjs": "^0.4.2",
@@ -69,6 +68,7 @@
     "donejs-cli": "^0.10.0-pre.0",
     "generator-donejs": "^0.10.0-pre.0",
     "jshint": "^2.9.1",
+    "socket.io-client": "^1.5.0",
     "steal": "^0.16.0",
     "steal-qunit": "^0.1.1",
     "steal-tools": "^0.16.0",

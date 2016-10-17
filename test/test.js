@@ -1,6 +1,7 @@
 var QUnit = require('steal-qunit');
 var fixtureSocket = require('can-fixture-socket');
 var fixture = require('can-fixture');
+var extractResponse = require('can-fixture/core').extractResponse;
 var canSet = require("can-set");
 var io = require('socket.io-client');
 
@@ -135,11 +136,12 @@ QUnit.test('Test with fixture store', function(assert){
 		// - on success it callse res(data).
 		// - format of returned data is {count: 3, data: [...]}
 		var req = {data: query};
-		var res = function(data, err){
-			if (err){
-				fn(err)
+		var res = function(){
+			var response = extractResponse.apply(null, arguments);
+			if (response[0] === 200){
+				fn(null, response[1]);
 			} else {
-				fn(null, data.data);
+				fn(response[1]);
 			}
 		};
 		messagesStore.getListData(req, res);
@@ -166,8 +168,8 @@ QUnit.test('Test with fixture store', function(assert){
 
 	socket.on('connect', function(){
 		assert.ok(true, 'client connected to socket');
-		socket.emit('messages find', {}, function(err, data){
-			assert.equal(data.length, 3, 'emit("messages find"): ackCb received 3 items');
+		socket.emit('messages find', {}, function(err, response){
+			assert.equal(response.count, 3, 'emit("messages find"): ackCb received 3 items');
 		});
 		socket.emit('messages get', {id: 1}, function(err, data){
 			assert.deepEqual(data, {id: 1, title: 'One'}, 'emit("messages get"): ackCb received the item');
