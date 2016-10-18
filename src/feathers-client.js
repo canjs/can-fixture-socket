@@ -56,7 +56,7 @@ function connectFeathersStoreToServer(serviceName, fixtureStore, mockServer){
 	// fixture.store.destroyData returns back the passed set, e.g. {id: 1}
 	// https://github.com/canjs/can-connect/blob/master/data/memory-cache/memory-cache.js#L416
 	// Feathers.remove returns back the whole object.
-	mockServer.on(serviceName + '::remove', toFeathersDataHandler(wrappedStore.destroyData, wrapToId, null));
+	mockServer.on(serviceName + '::remove', toFeathersRemoveHandler(wrappedStore.getData, wrappedStore.destroyData));
 	
 	//mockServer.on(serviceName + '::create', toFeathersDataHandler(wrappedStore.createData, null, null));
 	//mockServer.on(serviceName + '::update', toFeathersDataHandler(wrappedStore.createData, null, null));
@@ -80,6 +80,13 @@ function wrapToId(query){
 	return {id: query};
 }
 
+/**
+ * Transforms getListData from fixture to feathers format.
+ *   - fixture.store.getListData: {count, limit, offset, data}
+ *   - feathers.find:             {total, limit, skip, data}
+ * @param data
+ * @returns {{total: number, limit: number, skip: number, data: *}}
+ */
 // fixture.store.getListData: {count, limit, offset, data}
 // feathers.find:             {total, limit, skip, data}
 function toFeathersFind(data){
@@ -89,6 +96,36 @@ function toFeathersFind(data){
 		skip: data.offset,
 		data: data.data
 	};
+}
+
+/**
+ * FeathersJS's `remove` method returns the whole item back, when fixture.store's `destroyData` gives back only the given query (e.g. {id: 123}).
+ * Find the item by id first, then remove from fixture.store and return the item back.
+ * 
+ * Feathers `remove` method emits 2 arguments with data: `id` and `query`. But we ignore 2nd data argument for now.
+ * 
+ * @param destroyData The wrapped fixture.store.destroyData method.
+ * @param getData The wrapped fixture.store.getData method.
+ * @returns {Function}
+ */
+function toFeathersRemoveHandler(getData, destroyData){
+	return function(id, fn){
+		var query = {id: id};
+		getData(query, function(err, item){
+			if (err){
+				fn(err);
+			} else {
+				destroyData(query, function(err, data){
+					if (err){
+						fn(err);
+					} else {
+						fn(null, item);
+					}
+				})
+			}
+		});
+
+	}
 }
 
 module.exports = {

@@ -23,10 +23,6 @@ function toFixtureStoreHandler(method, methodName){
 				fn(response[1]);
 			}
 		};
-		console.log('Calling methodName ' + methodName);
-		if (methodName === 'destroyData'){
-			debugger;
-		}
 		method(req, res);
 	}
 }

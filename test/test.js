@@ -224,13 +224,13 @@ QUnit.test('FeathersJS protocol', function(assert){
 	socket.on('connect', function() {
 		assert.ok(true, 'client connected to socket');
 		socket.emit('messages::find', {}, function (err, response) {
-			assert.equal(response.total, 3, 'emit("messages::find"): ackCb response.total 3 items');
+			assert.equal(response.total, 3, 'emit("messages::find", {}): ackCb response.total 3 items');
 		});
-		socket.emit('messages::get', 1, function (err, data) {
-			assert.deepEqual(data, {id: 1, title: 'One'}, 'emit("messages::get"): ackCb received 1 item');
+		socket.emit('messages::get', 1, {}, function (err, data) {
+			assert.deepEqual(data, {id: 1, title: 'One'}, 'emit("messages::get", 1, {}): ackCb received 1 item');
 		});
-		socket.emit('messages::remove', 1, function (err, data) {
-			assert.deepEqual(data, {id: 1, title: 'One'}, 'emit("messages::remove"): ackCb received the removed item');
+		socket.emit('messages::remove', 1, {}, function (err, data) {
+			assert.deepEqual(data, {id: 1, title: 'One'}, 'emit("messages::remove", 1, {}): ackCb received the removed item');
 			done();
 		});
 	});

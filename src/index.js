@@ -55,7 +55,17 @@ MockedServer.prototype.on = function(event, cb){
 		sub(self.events,  name, events[name]);
 	})
 };
-MockedServer.prototype.emit = function(event, data, ackFn){
+/**
+ * The first argument is always `event`
+ * The middle arguments are data (usually one or two arguments). We ignore the further data arg if passed (for now).
+ * If the last argument is a function then its the ACK callback.
+ */
+MockedServer.prototype.emit = function(event, data){
+	var args = Array.prototype.slice.call(arguments),
+		ackFn;
+	if (typeof args[args.length - 1] === 'function'){
+		ackFn = args.pop();
+	}
 	console.log('server.emit ' + event);
 	pub(this.subscribers, event, data, ackFn)
 };
@@ -73,7 +83,12 @@ MockedSocket.prototype = {
 		console.log('MockedSocket.on ... ' + event);
 		sub(this._server.subscribers, event, cb);
 	},
-	emit: function(event, data, ackFn){
+	emit: function(event, data){
+		var ackFn,
+			lastArg = arguments[arguments.length - 1];
+		if (typeof lastArg === 'function'){
+			ackFn = lastArg;
+		}
 		console.log('MockedSocket.emit ...' + event);
 		pub(this._server.events, event, data, ackFn);
 	},
