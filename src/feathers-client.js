@@ -42,23 +42,26 @@ var wrapFixtureStore = require('./store').wrapFixtureStore;
 /**
  * Wraps fixture.store considering FeathersJS arguments format.
  * Transforms ((query, fn))
+ * @param serviceName
  * @param fixtureStore
+ * @param mockServer
+ * @param options
  * @returns {*}
  *
  * fixture.store data:
  * 		getListData: {}
  */
-function connectFeathersStoreToServer(serviceName, fixtureStore, mockServer){
+function connectFeathersStoreToServer(serviceName, fixtureStore, mockServer, options){
 	var wrappedStore = wrapFixtureStore(fixtureStore);
 	mockServer.on(serviceName + '::find', toFeathersDataHandler(wrappedStore.getListData, null, toFeathersFind));
-	mockServer.on(serviceName + '::get', toFeathersDataHandler(wrappedStore.getData, wrapToId, null));
+	mockServer.on(serviceName + '::get', toFeathersDataHandler(wrappedStore.getData, wrapToId(options), null));
 	
 	// fixture.store.destroyData returns back the passed set, e.g. {id: 1}
 	// https://github.com/canjs/can-connect/blob/master/data/memory-cache/memory-cache.js#L416
 	// Feathers.remove returns back the whole object.
-	mockServer.on(serviceName + '::remove', toFeathersRemoveHandler(wrappedStore.getData, wrappedStore.destroyData));
+	mockServer.on(serviceName + '::remove', toFeathersRemoveHandler(wrappedStore.getData, wrappedStore.destroyData, options));
 	
-	//mockServer.on(serviceName + '::create', toFeathersDataHandler(wrappedStore.createData, null, null));
+	mockServer.on(serviceName + '::create', toFeathersCreateHandler(wrappedStore.createData));
 	//mockServer.on(serviceName + '::update', toFeathersDataHandler(wrappedStore.createData, null, null));
 }
 
@@ -75,9 +78,18 @@ function toFeathersDataHandler(method, queryTransformer, dataTransformer){
 		})
 	}
 }
-
-function wrapToId(query){
-	return {id: query};
+/**
+ * Wraps given id into an object with property name `id` (or options.id).
+ * @param options
+ * @returns {Function}
+ */
+function wrapToId(options){
+	return function(id){
+		var o = {},
+			idProp = options && options.id || 'id';
+		o[idProp] = id;
+		return o;
+	}
 }
 
 /**
@@ -108,9 +120,9 @@ function toFeathersFind(data){
  * @param getData The wrapped fixture.store.getData method.
  * @returns {Function}
  */
-function toFeathersRemoveHandler(getData, destroyData){
+function toFeathersRemoveHandler(getData, destroyData, options){
 	return function(id, fn){
-		var query = {id: id};
+		var query = wrapToId(options)(id);
 		getData(query, function(err, item){
 			if (err){
 				fn(err);
@@ -121,10 +133,20 @@ function toFeathersRemoveHandler(getData, destroyData){
 					} else {
 						fn(null, item);
 					}
-				})
+				});
 			}
 		});
-
+	}
+}
+function toFeathersCreateHandler(createData){
+	return function(query, fn){
+		createData(query, function(err, data){
+			if (err){
+				fn(err);
+			} else {
+				fn(null, Object.assign({}, query, data));
+			}
+		});
 	}
 }
 

@@ -12,7 +12,7 @@ var extractResponse = require('can-fixture/core').extractResponse;
  *     - for getDataList: {count: <number>, limit: <number>, offset: <number> , data: [{...},{...}, ...]}
  *     - for getData: item object {...}
  */
-function toFixtureStoreHandler(method, methodName){
+function toFixtureStoreHandler(method){
 	return function(query, fn){
 		var req = {data: query};
 		var res = function(){

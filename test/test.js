@@ -202,18 +202,14 @@ QUnit.test('FeathersJS protocol', function(assert){
 	// Mock server
 	//
 	var messagesStore = fixture.store([
-		{id: 1, title: 'One'},
-		{id: 2, title: 'Two'},
-		{id: 3, title: 'Three'}
-	], new canSet.Algebra({}));
+		{_id: 1, title: 'One'},
+		{_id: 2, title: 'Two'},
+		{_id: 3, title: 'Three'}
+	], new canSet.Algebra(
+		canSet.props.id('_id')
+	));
 	
-	fixtureSocket.connectFeathersStoreToServer('messages', messagesStore, mockServer);
-	
-	//
-	// Prepare FeathersJS client app
-	//
-	//var app;
-	//var messagesService = app.service('messages');
+	fixtureSocket.connectFeathersStoreToServer('messages', messagesStore, mockServer, {id: '_id'});
 
 	//
 	// Test client:
@@ -224,13 +220,21 @@ QUnit.test('FeathersJS protocol', function(assert){
 	socket.on('connect', function() {
 		assert.ok(true, 'client connected to socket');
 		socket.emit('messages::find', {}, function (err, response) {
+			assert.equal(err, null, 'emit("messages::find", {}): error should be null');
 			assert.equal(response.total, 3, 'emit("messages::find", {}): ackCb response.total 3 items');
 		});
 		socket.emit('messages::get', 1, {}, function (err, data) {
-			assert.deepEqual(data, {id: 1, title: 'One'}, 'emit("messages::get", 1, {}): ackCb received 1 item');
+			assert.equal(err, null, 'emit("messages::get", 1, {}): error should be null');
+			assert.deepEqual(data, {_id: 1, title: 'One'}, 'emit("messages::get", 1, {}): ackCb received 1 item');
+		});
+		socket.emit('messages::create', {title: 'Four'}, {}, function (err, data) {
+			assert.equal(err, null, 'emit("messages::create", {...}, {}): error should be null');
+			assert.equal(data.title, 'Four', 'emit("messages::create", {...}, {}): ackCb received the created item');
+			assert.ok(data._id, 'emit("messages::create", {...}, {}): also returns id');
 		});
 		socket.emit('messages::remove', 1, {}, function (err, data) {
-			assert.deepEqual(data, {id: 1, title: 'One'}, 'emit("messages::remove", 1, {}): ackCb received the removed item');
+			assert.equal(err, null, 'emit("messages::remove", 1, {}): error should be null');
+			assert.deepEqual(data, {_id: 1, title: 'One'}, 'emit("messages::remove", 1, {}): ackCb received the removed item');
 			done();
 		});
 	});
