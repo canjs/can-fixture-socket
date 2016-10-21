@@ -4,6 +4,9 @@ var fixture = require('can-fixture');
 var extractResponse = require('can-fixture/core').extractResponse;
 var canSet = require("can-set");
 var io = require('socket.io-client');
+var feathers = require('feathers/client')
+var feathersSocketio = require('feathers-socketio/client');
+var hooks = require('feathers-hooks');
 
 var mockServer;
 QUnit.noop = function(){};
@@ -238,42 +241,19 @@ QUnit.test('FeathersJS protocol', function(assert){
 			done();
 		});
 	});
-	
-	
-    //
-	//messagesService.find({}).then(function(data){
-	//	assert.equal(data.length, 3, 'find should receive 3 items');
-	//});
-	//messagesService.get(1).then(function(data){
-	//	assert.deepEqual(data, {id: 1, title: 'One'}, 'get should receive an item');
-	//});
-	//messagesService.create({title: 'Four'}).then(function(data){
-	//	assert.equal(data.title, 'Four', 'create should add an new item');
-	//});
-	//messagesService.update(2, {title: 'TwoPlus'}).then(function(data){
-	//	assert.deepEqual(data, {id: 2, title: 'Two'}, 'update should update an item');
-	//});
-	//messagesService.remove(2, {title: 'TwoPlus'}).then(function(data){
-	//	assert.deepEqual(data, {id: 2, title: 'Two'}, 'update should update an item')
-	//});
-	//messagesService.get(2).catch(function(err){
-	//	assert.deepEqual(err, {status: 404, message: 'No data'}, 'update should update an item')
-	//	done();
-	//});
-	
 });
 
 /**
  * Test Feathers REST service.
  */
-QUnit.noop('FeathersJS REST service', function(assert){
+QUnit.test('FeathersJS REST service', function(assert){
 	//
 	// Mock server
 	//
 	var messagesStore = fixture.store([
 		{id: 1, title: 'One'},
 		{id: 2, title: 'Two'},
-		{id: 3, title: 'Two'}
+		{id: 3, title: 'Three'}
 	], new canSet.Algebra({}));
 	
 	fixtureSocket.connectFeathersStoreToServer('messages', messagesStore, mockServer);
@@ -281,17 +261,21 @@ QUnit.noop('FeathersJS REST service', function(assert){
 	//
 	// Prepare FeathersJS client app
 	//
-	var app;
+	var socket = io('http://api.my-feathers-server.com');
+
+	var app = feathers()
+		.configure(hooks())
+		.configure(feathersSocketio(socket));
+	
 	var messagesService = app.service('messages');
 
 	//
 	// Test client:
 	//
 	var done = assert.async();
-	var socket = io('localhost');
     
 	messagesService.find({}).then(function(data){
-		assert.equal(data.length, 3, 'find should receive 3 items');
+		assert.equal(data.total, 3, 'find should receive 3 items');
 	});
 	messagesService.get(1).then(function(data){
 		assert.deepEqual(data, {id: 1, title: 'One'}, 'get should receive an item');
@@ -300,13 +284,17 @@ QUnit.noop('FeathersJS REST service', function(assert){
 		assert.equal(data.title, 'Four', 'create should add an new item');
 	});
 	messagesService.update(2, {title: 'TwoPlus'}).then(function(data){
-		assert.deepEqual(data, {id: 2, title: 'Two'}, 'update should update an item');
+		assert.deepEqual(data, {id: 2, title: 'TwoPlus'}, 'update should receive an updated item');
 	});
-	messagesService.remove(2, {title: 'TwoPlus'}).then(function(data){
-		assert.deepEqual(data, {id: 2, title: 'Two'}, 'update should update an item')
+	messagesService.remove(2).then(function(data){
+		assert.deepEqual(data, {id: 2, title: 'TwoPlus'}, 'remove should remove the item and receive its data back');
 	});
-	messagesService.get(2).catch(function(err){
-		assert.deepEqual(err, {status: 404, message: 'No data'}, 'update should update an item')
+	messagesService.get(100).then(function(data){
+		assert.ok(false, 'Should have rejected this promise');
+		done();
+	}).catch(function(err){
+		assert.equal(err.error, 404, 'get unexisting item should reject the promise with 404');
+		assert.equal(err.message, 'no data', 'and message No data');
 		done();
 	});
 });

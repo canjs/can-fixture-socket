@@ -60,14 +60,10 @@ MockedServer.prototype.on = function(event, cb){
  * The middle arguments are data (usually one or two arguments). We ignore the further data arg if passed (for now).
  * If the last argument is a function then its the ACK callback.
  */
-MockedServer.prototype.emit = function(event, data){
-	var args = Array.prototype.slice.call(arguments),
-		ackFn;
-	if (typeof args[args.length - 1] === 'function'){
-		ackFn = args.pop();
-	}
+MockedServer.prototype.emit = function(event){
+	var dataArgs = Array.prototype.slice.call(arguments, 1);
 	console.log('server.emit ' + event);
-	pub(this.subscribers, event, data, ackFn)
+	pub(this.subscribers, event, dataArgs);
 };
 
 /**
@@ -83,14 +79,15 @@ MockedSocket.prototype = {
 		console.log('MockedSocket.on ... ' + event);
 		sub(this._server.subscribers, event, cb);
 	},
-	emit: function(event, data){
-		var ackFn,
-			lastArg = arguments[arguments.length - 1];
-		if (typeof lastArg === 'function'){
-			ackFn = lastArg;
-		}
+	/**
+	 * The first argument is always `event`
+	 * The middle arguments are data (usually one or two arguments).
+	 * If the last argument is a function then its the ACK callback.
+     */
+	emit: function(event){
+		var dataArgs = Array.prototype.slice.call(arguments, 1);
 		console.log('MockedSocket.emit ...' + event);
-		pub(this._server.events, event, data, ackFn);
+		pub(this._server.events, event, dataArgs);
 	},
 	once: function(){
 		console.log('MockedSocket.once ...');
@@ -101,14 +98,13 @@ MockedSocket.prototype = {
  * PubSub helpers.
  * @param pubsub A list of pubs or subs.
  * @param event {String} A name for a pubsub item (e.g. a name of event that we emit or subscribe to).
- * @param data
- * @param ackFn {Function} A acknowledgement function, is used for WebSocket ACK.
+ * @param dataArgs There could be either one or more data arguments (e.g. FeathersJS) and the last argument can be used for ACK callback. 
  */
-function pub(pubsub, event, data, ackFn){
+function pub(pubsub, event, dataArgs){
 	console.log(' >>> pub ' + event);
 	var subscribers = pubsub[event] || [];
 	subscribers.forEach(function(subscriber){
-		subscriber(data, ackFn);
+		subscriber.apply(null, dataArgs);
 	});
 }
 function sub(pubsub, event, cb){

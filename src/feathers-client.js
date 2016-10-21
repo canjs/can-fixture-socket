@@ -38,6 +38,7 @@
  */
 
 var wrapFixtureStore = require('./store').wrapFixtureStore;
+var assign = require('can-util/js/assign/assign');
 
 /**
  * Wraps fixture.store considering FeathersJS arguments format.
@@ -62,18 +63,23 @@ function connectFeathersStoreToServer(serviceName, fixtureStore, mockServer, opt
 	mockServer.on(serviceName + '::remove', toFeathersRemoveHandler(wrappedStore.getData, wrappedStore.destroyData, options));
 	
 	mockServer.on(serviceName + '::create', toFeathersCreateHandler(wrappedStore.createData));
-	//mockServer.on(serviceName + '::update', toFeathersDataHandler(wrappedStore.createData, null, null));
+	mockServer.on(serviceName + '::update', toFeathersUpdateHandler(wrappedStore.updateData, options));
 }
 
 function toFeathersDataHandler(method, queryTransformer, dataTransformer){
-	return function(query, fn){
+	return function(query){
+		var args = Array.prototype.slice.call(arguments),
+			fn;
+		if (typeof args[args.length-1] === 'function'){
+			fn = args[args.length-1];
+		}
 		query = queryTransformer ? queryTransformer(query) : query;
 		method(query, function(err, data){
 			if (err){
-				fn(err);
+				fn && fn(err);
 			} else {
 				data = dataTransformer ? dataTransformer(data) : data;
-				fn(null, data);
+				fn && fn(null, data);
 			}
 		})
 	}
@@ -121,13 +127,13 @@ function toFeathersFind(data){
  * @returns {Function}
  */
 function toFeathersRemoveHandler(getData, destroyData, options){
-	return function(id, fn){
-		var query = wrapToId(options)(id);
-		getData(query, function(err, item){
+	return function(id, query, fn){
+		var setQuery = wrapToId(options)(id);
+		getData(setQuery, function(err, item){
 			if (err){
 				fn(err);
 			} else {
-				destroyData(query, function(err, data){
+				destroyData(setQuery, function(err, data){
 					if (err){
 						fn(err);
 					} else {
@@ -138,13 +144,25 @@ function toFeathersRemoveHandler(getData, destroyData, options){
 		});
 	}
 }
-function toFeathersCreateHandler(createData){
-	return function(query, fn){
-		createData(query, function(err, data){
+function toFeathersUpdateHandler(updateData, options){
+	return function(id, data, query, fn){
+		var setQuery = wrapToId(options)(id);
+		updateData(assign(setQuery, data), function(err, data2){
 			if (err){
 				fn(err);
 			} else {
-				fn(null, Object.assign({}, query, data));
+				fn(null, assign(setQuery, assign(data, data2)));
+			}
+		});
+	}
+}
+function toFeathersCreateHandler(createData){
+	return function(data, query, fn){
+		createData(data, function(err, data2){
+			if (err){
+				fn(err);
+			} else {
+				fn(null, assign(data, data2));
 			}
 		});
 	}
