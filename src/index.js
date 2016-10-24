@@ -1,4 +1,4 @@
-/**
+/*
  * Summary: `io(url)` creates an instance of `io.Manager` for the given url and stores it in cache of managers `io.managers`.
  * If `io` is called with the same URL several times it will lookup Manager in the cache.
  * One manager creates one physical (transport) connection and can create several "virtual" connections within
@@ -14,11 +14,14 @@
 var subscribeFeathersStoreToServer = require('./feathers-client').subscribeFeathersStoreToServer;
 
 /**
+ * @constructor can-fixture-socket.Server Server
+ * @parent can-fixture-socket/properties
+ * 
+ * @signature `new Server( io )`
  * The mocked socket.io-server. On instantiation we:
  *   - clear io.managers which is a cache of Manager instances;
  *   - override Manager.prototype to work with current instance of the mocked server.
- * @param io Imported socket.io-client.
- * @constructor
+ * @param {function} io Imported socket.io-client.
  */
 var MockedServer = function(io){
 	// PubSub:
@@ -38,7 +41,7 @@ var MockedServer = function(io){
 		resetManagerCache(io.managers);
 	}
 };
-/**
+/*
  * Subscribe to events.
  * @param event Overloaded argument: either a string, then 2nd argument is cb; or an object with multiple events: {ev1: cb1, ev2: cb2, ...}.
  * @param cb
