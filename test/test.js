@@ -204,7 +204,7 @@ QUnit.test('FeathersJS protocol', function(assert){
 	//
 	// Mock server
 	//
-	var messagesStore = fixture.store([
+	var fixtureStore = fixture.store([
 		{_id: 1, title: 'One'},
 		{_id: 2, title: 'Two'},
 		{_id: 3, title: 'Three'}
@@ -212,7 +212,7 @@ QUnit.test('FeathersJS protocol', function(assert){
 		canSet.props.id('_id')
 	));
 	
-	fixtureSocket.connectFeathersStoreToServer('messages', messagesStore, mockServer, {id: '_id'});
+	mockServer.onFeathersService('messages', fixtureStore, {id: '_id'});
 
 	//
 	// Test client:
@@ -250,13 +250,13 @@ QUnit.test('FeathersJS REST service', function(assert){
 	//
 	// Mock server
 	//
-	var messagesStore = fixture.store([
+	var fixtureStore = fixture.store([
 		{id: 1, title: 'One'},
 		{id: 2, title: 'Two'},
 		{id: 3, title: 'Three'}
 	], new canSet.Algebra({}));
 	
-	fixtureSocket.connectFeathersStoreToServer('messages', messagesStore, mockServer);
+	mockServer.onFeathersService('messages', fixtureStore);
 	
 	//
 	// Prepare FeathersJS client app

@@ -41,7 +41,7 @@ var storeToListeners = require('./store').storeToListeners;
 var assign = require('can-util/js/assign/assign');
 
 /**
- * Wraps fixture.store considering FeathersJS arguments format.
+ * Subscribes to mocked socket server events for FeathersJS service.
  * Transforms ((query, fn))
  * @param serviceName
  * @param fixtureStore
@@ -52,7 +52,7 @@ var assign = require('can-util/js/assign/assign');
  * fixture.store data:
  * 		getListData: {}
  */
-function connectFeathersStoreToServer(serviceName, fixtureStore, mockServer, options){
+function subscribeFeathersStoreToServer(serviceName, fixtureStore, mockServer, options){
 	var listeners = storeToListeners(fixtureStore);
 	mockServer.on(serviceName + '::find', toFeathersDataHandler(listeners.getListData, null, toFeathersFind));
 	mockServer.on(serviceName + '::get', toFeathersDataHandler(listeners.getData, wrapToId(options), null));
@@ -169,5 +169,5 @@ function toFeathersCreateHandler(createData){
 }
 
 module.exports = {
-	connectFeathersStoreToServer: connectFeathersStoreToServer
+	subscribeFeathersStoreToServer: subscribeFeathersStoreToServer
 };

@@ -11,6 +11,8 @@
  *   - override io.Manager.prototype methods to work with the mocked server.
  */
 
+var subscribeFeathersStoreToServer = require('./feathers-client').subscribeFeathersStoreToServer;
+
 /**
  * The mocked socket.io-server. On instantiation we:
  *   - clear io.managers which is a cache of Manager instances;
@@ -64,6 +66,15 @@ MockedServer.prototype.emit = function(event){
 	var dataArgs = Array.prototype.slice.call(arguments, 1);
 	console.log('server.emit ' + event);
 	pub(this.subscribers, event, dataArgs);
+};
+/**
+ * Subscribes to mocked server events for FeathersJS protocol.
+ * @param serviceName The name of Feathers service.
+ * @param fixtureStore
+ * @param options
+ */
+MockedServer.prototype.onFeathersService = function(serviceName, fixtureStore, options){
+	subscribeFeathersStoreToServer(serviceName, fixtureStore, this, options);
 };
 
 /**
@@ -171,7 +182,7 @@ function resetManagerCache(cache){
 module.exports = {
 	Server: MockedServer,
 	mockSocketManager: mockManager,
-	restoreManager: restoreManager,
+	restoreManager: restoreManager
 };
 
 

@@ -7,6 +7,5 @@ module.exports = {
 	mockSocketManager: fixtureSocket.mockSocketManager,
 	restoreManager: fixtureSocket.restoreManager,
 	requestHandlerToListener: fixtureStore.requestHandlerToListener,
-	storeToListeners: fixtureStore.storeToListeners,
-	connectFeathersStoreToServer: fixtureFeathers.connectFeathersStoreToServer
+	storeToListeners: fixtureStore.storeToListeners
 };
