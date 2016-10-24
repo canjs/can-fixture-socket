@@ -1,7 +1,7 @@
 var extractResponse = require('can-fixture/core').extractResponse;
 
 /**
- * Fixture.store helpers: toFixtureStoreHandler. Transforms ((req, res) -> ()) -> ((str, cb) -> ()), where cb::(err, data) -> ().
+ * Fixture.store helpers: requestHandlerToListener. Transforms ((req, res) -> ()) -> ((str, cb) -> ()), where cb::(err, data) -> ().
  * @param method {Function} A method like fixture.store.getDataList.
  *
  * Fixture.store methods expect two arguments `req` and `res`:
@@ -12,7 +12,7 @@ var extractResponse = require('can-fixture/core').extractResponse;
  *     - for getDataList: {count: <number>, limit: <number>, offset: <number> , data: [{...},{...}, ...]}
  *     - for getData: item object {...}
  */
-function toFixtureStoreHandler(method){
+function requestHandlerToListener(method){
 	return function(query, fn){
 		var req = {data: query};
 		var res = function(){
@@ -32,15 +32,15 @@ function toFixtureStoreHandler(method){
  * @param fixtureStore
  * @returns {*}
  */
-function wrapFixtureStore(fixtureStore){
+function storeToListeners(fixtureStore){
 	var methods = ['getListData', 'getData', 'updateData', 'createData', 'destroyData'];
-	return methods.reduce(function(wrappedStore, method){
-		wrappedStore[method] = toFixtureStoreHandler(fixtureStore[method], method);
-		return wrappedStore;
+	return methods.reduce(function(listeners, method){
+		listeners[method] = requestHandlerToListener(fixtureStore[method]);
+		return listeners;
 	}, {});
 }
 
 module.exports = {
-	toFixtureStoreHandler: toFixtureStoreHandler,
-	wrapFixtureStore: wrapFixtureStore,
+	requestHandlerToListener: requestHandlerToListener,
+	storeToListeners: storeToListeners
 };

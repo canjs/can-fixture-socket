@@ -37,7 +37,7 @@
  * 
  */
 
-var wrapFixtureStore = require('./store').wrapFixtureStore;
+var storeToListeners = require('./store').storeToListeners;
 var assign = require('can-util/js/assign/assign');
 
 /**
@@ -53,17 +53,17 @@ var assign = require('can-util/js/assign/assign');
  * 		getListData: {}
  */
 function connectFeathersStoreToServer(serviceName, fixtureStore, mockServer, options){
-	var wrappedStore = wrapFixtureStore(fixtureStore);
-	mockServer.on(serviceName + '::find', toFeathersDataHandler(wrappedStore.getListData, null, toFeathersFind));
-	mockServer.on(serviceName + '::get', toFeathersDataHandler(wrappedStore.getData, wrapToId(options), null));
+	var listeners = storeToListeners(fixtureStore);
+	mockServer.on(serviceName + '::find', toFeathersDataHandler(listeners.getListData, null, toFeathersFind));
+	mockServer.on(serviceName + '::get', toFeathersDataHandler(listeners.getData, wrapToId(options), null));
 	
 	// fixture.store.destroyData returns back the passed set, e.g. {id: 1}
 	// https://github.com/canjs/can-connect/blob/master/data/memory-cache/memory-cache.js#L416
 	// Feathers.remove returns back the whole object.
-	mockServer.on(serviceName + '::remove', toFeathersRemoveHandler(wrappedStore.getData, wrappedStore.destroyData, options));
+	mockServer.on(serviceName + '::remove', toFeathersRemoveHandler(listeners.getData, listeners.destroyData, options));
 	
-	mockServer.on(serviceName + '::create', toFeathersCreateHandler(wrappedStore.createData));
-	mockServer.on(serviceName + '::update', toFeathersUpdateHandler(wrappedStore.updateData, options));
+	mockServer.on(serviceName + '::create', toFeathersCreateHandler(listeners.createData));
+	mockServer.on(serviceName + '::update', toFeathersUpdateHandler(listeners.updateData, options));
 }
 
 function toFeathersDataHandler(method, queryTransformer, dataTransformer){

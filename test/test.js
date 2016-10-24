@@ -152,15 +152,15 @@ QUnit.test('Test with fixture store', function(assert){
 	
 	// #2: We can use a helper wrapper for event helper:
 	mockServer.on({
-		'messages get': fixtureSocket.toFixtureStoreHandler(messagesStore.getData)
+		'messages get': fixtureSocket.requestHandlerToListener(messagesStore.getData)
 	});
 	
 	// #3: We also can wrap fixture store to provide socket event ready methods:
-	var socketMessagesStore = fixtureSocket.wrapFixtureStore(messagesStore);
+	var listeners = fixtureSocket.storeToListeners(messagesStore);
 	mockServer.on({
-		'messages remove': socketMessagesStore.destroyData,
-		'messages create': socketMessagesStore.createData,
-		'messages update': socketMessagesStore.updateData
+		'messages remove': listeners.destroyData,
+		'messages create': listeners.createData,
+		'messages update': listeners.updateData
 	});
 
 	//
