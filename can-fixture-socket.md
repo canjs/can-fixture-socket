@@ -13,7 +13,7 @@ can-fixture-socket intercepts socket.io connection and allows to simulate socket
 
 With three simple steps you can test your real-time application that uses socket.io:
 
-- instantiate mocked server;
+- instantiate server to intercept socket.io;
 - mock server behaviour;
 - test your application.
 
@@ -45,7 +45,7 @@ socket.on("notifications", function(data){
 
 @body
 
-## Use of basics
+## Use basics
 
 can-fixture-socket.Server is a constructor that when given socket.io object intercepts socket connection:
 ```js
@@ -74,7 +74,9 @@ socket.on("message created", function(data){
 });
 ```
 
-We also can use the acknowledgement callbacks:
+### Acknowledgement callbacks
+
+We also can use socket.io [acknowledgement callbacks](http://socket.io/docs/#sending-and-getting-data-(acknowledgements)):
 ```js
 mockedServer.on("users create", function(user, ackCb){
   console.log("Save new user to DB and return new user id", user);
@@ -94,9 +96,9 @@ socket.on("connect", function(){
 });
 ```
 
-## Use of can-fixture.Store
+## Use with can-fixture.Store
 
-With [can-fixture.store] we can create a storage of items and emulate fully working CRUD service. Optionally we can use [can-set.Algebra] to power our store with binary operations on sets.
+With can-fixture [can-fixture.store] we can create a storage of items and emulate a fully working CRUD service. Optionally we can use [can-set.Algebra] to power our store with binary operations on sets.
 ```js
 var fixtureSocket = require("can-fixture-socket");
 var io = require("socket.io-client");
@@ -131,7 +133,7 @@ mockedServer.on({
 });
 ```
 
-## Use with FeathersJS:
+## Use with FeathersJS
 
 Feathers is a minimalist, service-oriented, real-time web framework for modern applications. It is a NodeJS framework built on top of Express. It allows you to build REST-ful services and works with three [providers](https://docs.feathersjs.com/providers/): standard HTTP communication, WebSockets and Primus.
 

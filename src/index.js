@@ -13,16 +13,10 @@
 
 var subscribeFeathersStoreToServer = require('./feathers-client').subscribeFeathersStoreToServer;
 
-/**
- * @constructor can-fixture-socket.Server Server
- * @parent can-fixture-socket.properties
- * @group can-fixture-socket.Server.prototype prototype
- * 
- * @signature `new Server( io )`
- * The mocked socket.io-server. On instantiation we:
- *   - clear io.managers which is a cache of Manager instances;
- *   - override Manager.prototype to work with current instance of the mocked server.
- * @param {function} io Imported socket.io-client.
+/*
+ * Mocked socket.io server that intercepts socket.io connection and can simulate socket.io server behaviour.
+ * @constructor
+ * @param {Object} io Imported `socket.io-client` object.
  */
 var MockedServer = function(io){
 	this.io = io;
@@ -90,7 +84,7 @@ MockedServer.prototype.on = function(event, cb){
  * @function can-fixture-socket.Server.prototype.emit emit
  * @parent can-fixture-socket.Server.prototype
  *
- * @signature `server.emit(event, ...data, ackFn)`
+ * @signature `server.emit(event, ...data, [ackFn])`
  *
  * Emits a socket event.
  *
@@ -102,11 +96,11 @@ MockedServer.prototype.on = function(event, cb){
  *
  *   @param {string} event The name of the socket event.
  *   @param {*} data Data to be sent with the event. Could be more than one argument.
- *   @param {function} ackFn The acknowledgement function that will be executed if the receiver calls the acknowledgement callback.
+ *   @param {function} [ackFn] The acknowledgement function that will be executed if the receiver calls the acknowledgement callback.
  */
 MockedServer.prototype.emit = function(event){
 	var dataArgs = Array.prototype.slice.call(arguments, 1);
-	console.log('server.emit ' + event);
+	//console.log('server.emit ' + event);
 	pub(this.subscribers, event, dataArgs);
 };
 
@@ -114,23 +108,32 @@ MockedServer.prototype.emit = function(event){
  * @function can-fixture-socket.Server.prototype.onFeathersService onFeathersService
  * @parent can-fixture-socket.Server.prototype
  * 
- * @signature `server.onFeathersService(serviceName, fixtureStore, [options])`
+ * @signature `server.onFeathersService(name, fixtureStore, [options])`
  * 
  * Subscribes to mocked server events for FeathersJS protocol.
  * 
  * ```
  * var fixtureStore = fixture.store([
- *   {_id: 1, title: 'One'},
- *   {_id: 2, title: 'Two'},
- *   {_id: 3, title: 'Three'}
+ *   {id: 1, title: 'One'},
+ *   {id: 2, title: 'Two'},
+ *   {id: 3, title: 'Three'}
  * ], new canSet.Algebra({}));
  * 
- * server.onFeathersService("messages", fixtureStore, {id: "_id"})
+ * server.onFeathersService("messages", fixtureStore})
  * ```
  * 
- *   @param {String} serviceName The name of Feathers service.
- *   @param {can-fixture.Store} fixtureStore
- *   @param {Object} options Options, e.g. property name for id.
+ *   @param {String} name The name of Feathers service.
+ *   @param {can-fixture.Store} fixtureStore An instance of [can-fixture.Store].
+ *   @param {Object} [options] Options, e.g. property name for id.
+ * 
+ * @body
+ * 
+ * ## Use
+ * 
+ * Instantiate fixture store by calling [can-fixture.store] and provide FeathersJS service name:
+ * ```js
+ * 
+ * ```
  */
 MockedServer.prototype.onFeathersService = function(serviceName, fixtureStore, options){
 	subscribeFeathersStoreToServer(serviceName, fixtureStore, this, options);
