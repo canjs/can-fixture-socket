@@ -15,7 +15,8 @@ var subscribeFeathersStoreToServer = require('./feathers-client').subscribeFeath
 
 /**
  * @constructor can-fixture-socket.Server Server
- * @parent can-fixture-socket/properties
+ * @parent can-fixture-socket.properties
+ * @group can-fixture-socket.Server.prototype prototype
  * 
  * @signature `new Server( io )`
  * The mocked socket.io-server. On instantiation we:
@@ -24,6 +25,8 @@ var subscribeFeathersStoreToServer = require('./feathers-client').subscribeFeath
  * @param {function} io Imported socket.io-client.
  */
 var MockedServer = function(io){
+	this.io = io;
+	
 	// PubSub:
 	this.events = {};
 	this.subscribers = {};
@@ -33,18 +36,40 @@ var MockedServer = function(io){
 	resetManagerCache(io.managers);
 
 	// Override Manager's prototype:
-	var origs = mockManager(io.Manager.prototype, this);
-
-	// Attach a restore method with access to origs and the prototype:
-	this.restore = function(){
-		restoreManager(io.Manager.prototype, origs);
-		resetManagerCache(io.managers);
-	}
+	this.origs = mockManager(io.Manager.prototype, this);
 };
-/*
- * Subscribe to events.
- * @param event Overloaded argument: either a string, then 2nd argument is cb; or an object with multiple events: {ev1: cb1, ev2: cb2, ...}.
- * @param cb
+
+/**
+ * @function can-fixture-socket.Server.prototype.on on
+ * @parent can-fixture-socket.Server.prototype
+ * 
+ * @signature `server.on(event, handler)`
+ * 
+ * Adds a socket event listener.
+ * 
+ * ```js
+ * server.on("notifications", function(data, ackFn){
+ *   console.log("Received " + data);
+ *   ackFn("Acknowledged, thank you");
+ * });
+ * ```
+ * 
+ *   @param {string} event The name of the socket event to listen for.
+ *   @param {function} handler The handler that will be executed to handle the socket event.
+ * 
+ * @signature `server.on(eventsObject)`
+ * 
+ * A short hand method to add multiple event listeners.
+ * 
+ * ```js
+ * server.on({
+ *   "news": handleNews,
+ *   "tweets": handleTweets,
+ *   "users": handleUsers
+ * });
+ * ```
+ * 
+ *   @param {object} eventsObject 
  */
 MockedServer.prototype.on = function(event, cb){
 	var self = this;
@@ -60,30 +85,84 @@ MockedServer.prototype.on = function(event, cb){
 		sub(self.events,  name, events[name]);
 	})
 };
+
 /**
- * The first argument is always `event`
- * The middle arguments are data (usually one or two arguments). We ignore the further data arg if passed (for now).
- * If the last argument is a function then its the ACK callback.
+ * @function can-fixture-socket.Server.prototype.emit emit
+ * @parent can-fixture-socket.Server.prototype
+ *
+ * @signature `server.emit(event, ...data, ackFn)`
+ *
+ * Emits a socket event.
+ *
+ * ```js
+ * server.emit("news", data, function(...data){
+ *   console.log("Client acknowledged");
+ * });
+ * ```
+ *
+ *   @param {string} event The name of the socket event.
+ *   @param {*} data Data to be sent with the event. Could be more than one argument.
+ *   @param {function} ackFn The acknowledgement function that will be executed if the receiver calls the acknowledgement callback.
  */
 MockedServer.prototype.emit = function(event){
 	var dataArgs = Array.prototype.slice.call(arguments, 1);
 	console.log('server.emit ' + event);
 	pub(this.subscribers, event, dataArgs);
 };
+
 /**
+ * @function can-fixture-socket.Server.prototype.onFeathersService onFeathersService
+ * @parent can-fixture-socket.Server.prototype
+ * 
+ * @signature `server.onFeathersService(serviceName, fixtureStore, [options])`
+ * 
  * Subscribes to mocked server events for FeathersJS protocol.
- * @param serviceName The name of Feathers service.
- * @param fixtureStore
- * @param options
+ * 
+ * ```
+ * var fixtureStore = fixture.store([
+ *   {_id: 1, title: 'One'},
+ *   {_id: 2, title: 'Two'},
+ *   {_id: 3, title: 'Three'}
+ * ], new canSet.Algebra({}));
+ * 
+ * server.onFeathersService("messages", fixtureStore, {id: "_id"})
+ * ```
+ * 
+ *   @param {String} serviceName The name of Feathers service.
+ *   @param {can-fixture.Store} fixtureStore
+ *   @param {Object} options Options, e.g. property name for id.
  */
 MockedServer.prototype.onFeathersService = function(serviceName, fixtureStore, options){
 	subscribeFeathersStoreToServer(serviceName, fixtureStore, this, options);
 };
 
 /**
+ * @function can-fixture-socket.Server.prototype.restore restore
+ * @parent can-fixture-socket.Server.prototype
+ * 
+ * @signature `server.restore()`
+ * 
+ * Restores `io.Manager.prototype` and clears `io.managers` cache.
+ * 
+ * ```
+ * server.restore();
+ * ```
+ */
+MockedServer.prototype.restore = function(){
+	restoreManager(this.io.Manager.prototype, this.origs);
+	resetManagerCache(this.io.managers);
+};
+
+/**
+ * @constructor can-fixture-socket.Socket Socket
+ * @private
+ * @parent can-fixture-socket.types
+ * 
+ * @signature `new Socket(server)`
+ * 
  * Manager instantiates Socket. We mock Socket's methods to work with the mocked server instance.
- * @param server Mocked server.
- * @constructor
+ * 
+ *   @param {can-fixture-socket.Server} server Mocked server.
  */
 var MockedSocket = function(server){
 	this._server = server;
@@ -108,7 +187,7 @@ MockedSocket.prototype = {
 	}
 };
 
-/**
+/*
  * PubSub helpers.
  * @param pubsub A list of pubs or subs.
  * @param event {String} A name for a pubsub item (e.g. a name of event that we emit or subscribe to).
@@ -129,7 +208,7 @@ function sub(pubsub, event, cb){
 	pubsub[event].push(cb);
 }
 
-/**
+/*
  * Override Manager.prototype's method to work with the instantiated mocked server.
  * @param managerProto
  * @param server
@@ -158,7 +237,7 @@ function mockManager(managerProto, server){
 	return origs;
 }
 
-/**
+/*
  * Restore Manager prototype.
  * @param managerProto
  * @param origs
@@ -170,7 +249,7 @@ function restoreManager(managerProto, origs){
 	});
 }
 
-/**
+/*
  * We need to reset cache of Managers so that the new mocked server would create a new Manager for the same URL.
  * @param cache
  */

@@ -1,6 +1,9 @@
 var extractResponse = require('can-fixture/core').extractResponse;
 
 /**
+ * @function can-fixture-socket.requestHandlerToListener requestHandlerToListener
+ * @parent can-fixture-socket.properties
+ * 
  * Fixture.store helpers: requestHandlerToListener. Transforms ((req, res) -> ()) -> ((str, cb) -> ()), where cb::(err, data) -> ().
  * @param method {Function} A method like fixture.store.getDataList.
  *
@@ -28,7 +31,10 @@ function requestHandlerToListener(method){
 }
 
 /**
- * Wraps all methods of fixture.store into socket ack handler.
+ * @function can-fixture-socket.storeToListeners storeToListeners
+ * @parent can-fixture-socket.properties
+ * 
+ * Wraps methods of fixture.store to make them socket event listener.
  * @param fixtureStore
  * @returns {*}
  */
