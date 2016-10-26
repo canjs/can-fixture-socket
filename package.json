@@ -58,11 +58,11 @@
     "npmAlgorithm": "flat"
   },
   "dependencies": {
-    "can-fixture": "^0.4.0-pre.17",
-    "can-util": "^3.0.0-pre.68"
+    "can-fixture": "^1.0.0",
+    "can-util": "^3.0.0"
   },
   "devDependencies": {
-    "can-set": "^0.6.0-pre.11",
+    "can-set": "^1.0.0",
     "cssify": "^0.6.0",
     "documentjs": "^0.4.2",
     "done-serve": "^0.3.0-pre.0",
@@ -75,9 +75,9 @@
     "jshint": "^2.9.1",
     "object-assign": "^4.1.0",
     "socket.io-client": "^1.5.0",
-    "steal": "^0.16.0",
-    "steal-qunit": "^0.1.1",
-    "steal-tools": "^0.16.0",
+    "steal": "^0.16.41",
+    "steal-qunit": "^0.1.4",
+    "steal-tools": "^0.16.8",
     "testee": "^0.2.4"
   }
 }
