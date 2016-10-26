@@ -58,7 +58,7 @@
     "npmAlgorithm": "flat"
   },
   "dependencies": {
-    "can-fixture": "^0.4.0-pre.17", 
+    "can-fixture": "^0.4.0-pre.17",
     "can-util": "^3.0.0-pre.68"
   },
   "devDependencies": {
@@ -67,11 +67,13 @@
     "documentjs": "^0.4.2",
     "done-serve": "^0.3.0-pre.0",
     "donejs-cli": "^0.10.0-pre.0",
+    "es6-promise-polyfill": "^1.2.0",
     "feathers": "^2.0.2",
     "feathers-hooks": "^1.5.8",
     "feathers-socketio": "^1.4.1",
     "generator-donejs": "^0.10.0-pre.0",
     "jshint": "^2.9.1",
+    "object-assign": "^4.1.0",
     "socket.io-client": "^1.5.0",
     "steal": "^0.16.0",
     "steal-qunit": "^0.1.1",

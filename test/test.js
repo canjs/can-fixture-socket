@@ -8,6 +8,12 @@ var feathers = require('feathers/client');
 var feathersSocketio = require('feathers-socketio/client');
 var hooks = require('feathers-hooks');
 
+// Polyfills for Travis:
+var Promise = require('es6-promise-polyfill');
+if (!Object.assign){
+	Object.assign = require('object-assign');
+}
+
 var mockServer;
 QUnit.noop = function(){};
 
@@ -273,28 +279,35 @@ QUnit.test('FeathersJS REST service', function(assert){
 	// Test client:
 	//
 	var done = assert.async();
+	
+	Promise.all([
     
-	messagesService.find({}).then(function(data){
-		assert.equal(data.total, 3, 'find should receive 3 items');
-	});
-	messagesService.get(1).then(function(data){
-		assert.deepEqual(data, {id: 1, title: 'One'}, 'get should receive an item');
-	});
-	messagesService.create({title: 'Four'}).then(function(data){
-		assert.equal(data.title, 'Four', 'create should add an new item');
-	});
-	messagesService.update(2, {title: 'TwoPlus'}).then(function(data){
-		assert.deepEqual(data, {id: 2, title: 'TwoPlus'}, 'update should receive an updated item');
-	});
-	messagesService.remove(2).then(function(data){
-		assert.deepEqual(data, {id: 2, title: 'TwoPlus'}, 'remove should remove the item and receive its data back');
-	});
-	messagesService.get(100).then(function(data){
-		assert.ok(false, 'Should have rejected this promise');
+		messagesService.find({}).then(function(data){
+			assert.equal(data.total, 3, 'find should receive 3 items');
+		}),
+		messagesService.get(1).then(function(data){
+			assert.deepEqual(data, {id: 1, title: 'One'}, 'get should receive an item');
+		}),
+		messagesService.create({title: 'Four'}).then(function(data){
+			assert.equal(data.title, 'Four', 'create should add an new item');
+		}),
+		messagesService.update(2, {title: 'TwoPlus'}).then(function(data){
+			assert.deepEqual(data, {id: 2, title: 'TwoPlus'}, 'update should receive an updated item');
+		}),
+		messagesService.remove(2).then(function(data){
+			assert.deepEqual(data, {id: 2, title: 'TwoPlus'}, 'remove should remove the item and receive its data back');
+		}),
+		messagesService.get(100).then(function(data){
+			assert.ok(false, 'Should have rejected this promise');
+		}).catch(function(err){
+			assert.equal(err.error, 404, 'get unexisting item should reject the promise with 404');
+			assert.equal(err.message, 'no data', 'and message No data');
+		})
+	
+	]).then(function(){
 		done();
 	}).catch(function(err){
-		assert.equal(err.error, 404, 'get unexisting item should reject the promise with 404');
-		assert.equal(err.message, 'no data', 'and message No data');
+		console.log('ERROR final test failed', err);
 		done();
-	});
+	})
 });
