@@ -33,16 +33,21 @@ mockedServer.on("connection", function(){
   mockedServer.emit("notifications", [{text: "A new notification"}]);
 });
 
-mockedServer.on("some event", function(data){
+mockedServer.on("some event", function(data, ackCb){
   console.log("Client send some ", data);
+  ackCb("thanks");
+});
+```
+
+3. Test your client app:
+```js
+var socket = io("http://localhost:8080/ws");
+socket.emit("some event", "some data", function(data){
+  assert.equal(data, "thanks", "Server acknowledged our event");
 });
 ```
 
 ## Examples
-
-### Simple CRUD service
-
-...
 
 ### CRUD service with fixture store
 
@@ -68,11 +73,12 @@ Fixture store is designed to work with XHR services, thus its methods take two a
 
 Now we can create socket event listeners for our CRUD operations:
 ```js
-mockServer.on("messages find", fixtureSocket.requestHandlerToListener(fixtureStore.getListData));
-mockServer.on("messages get", fixtureSocket.requestHandlerToListener(fixtureStore.getData));
-mockServer.on("messages remove", fixtureSocket.requestHandlerToListener(fixtureStore.destroyData));
-mockServer.on("messages create", fixtureSocket.requestHandlerToListener(fixtureStore.createData));
-mockServer.on("messages update", fixtureSocket.requestHandlerToListener(fixtureStore.updateData));
+var toListener = fixtureSocket.requestHandlerToListener
+mockServer.on("messages find",   toListener( fixtureStore.getListData ));
+mockServer.on("messages get",    toListener( fixtureStore.getData     ));
+mockServer.on("messages remove", toListener( fixtureStore.destroyData ));
+mockServer.on("messages create", toListener( fixtureStore.createData  ));
+mockServer.on("messages update", toListener( fixtureStore.updateData  ));
 ```
 
 There is also a helper [can-fixture-socket.storeToListeners] to create all listeners at once:
@@ -87,7 +93,7 @@ mockServer.on({
 });
 ```
 
-Now lets implement a CRUD model on client:
+Now lets implement a CRUD model on client. We define that all our ACK callbacks will take first argument as an error, and second as data.
 ```js
 var socket = io("localhost");
 
@@ -97,5 +103,19 @@ socket.emit("messages find", {rank: "good"}, function(err, response){
     return;
   }
   console.log(`We found ${response.count} good items", response.data);
+  assert.equal(response.count, 3)
+});
+```
+
+Now lets test the rest of the methods:
+```js
+socket.emit("messages get", {id: 1}, function(err, data){s
+  assert.deepEqual(data, {id: 1, title: "One"}, "received the item");
+});
+socket.emit("messages update", {id: 2, title: "TwoPlus"}, function(err, data){
+  assert.deepEqual(data, {id: 2, title: "TwoPlus"}, "received the updated item");
+});
+socket.emit("messages get", {id: 999}, function(err, data){
+  assert.deepEqual(err, {error: 404, message: "no data"}, "received 404 when looking for a non-existent item id");
 });
 ```
