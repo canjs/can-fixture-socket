@@ -13,7 +13,9 @@
 
 var subscribeFeathersStoreToServer = require('./feathers-client').subscribeFeathersStoreToServer;
 
-/*
+/* 
+ * See/update `docs/can-fixture-socket.server.md`.
+ *
  * Mocked socket.io server that intercepts socket.io connection and can simulate socket.io server behaviour.
  * @constructor
  * @param {Object} io Imported `socket.io-client` object.
@@ -49,7 +51,7 @@ var MockedServer = function(io){
  * ```
  * 
  *   @param {string} event The name of the socket event to listen for.
- *   @param {function} handler The handler that will be executed to handle the socket event.
+ *   @param {can-fixture-socket.socket-event-listener} handler The handler that will be executed to handle the socket event.
  * 
  * @signature `server.on(eventsObject)`
  * 
@@ -104,36 +106,14 @@ MockedServer.prototype.emit = function(event){
 	pub(this.subscribers, event, dataArgs);
 };
 
-/**
- * @function can-fixture-socket.Server.prototype.onFeathersService onFeathersService
- * @parent can-fixture-socket.Server.prototype
+/* 
+ * See/update `docs/can-fixture-socket.on-feathers-service.md`.
  * 
- * @signature `server.onFeathersService(name, fixtureStore, [options])`
+ * Subscribes to mocked server socket events to work as FeathersJS CRUD service. Uses fixture store [can-fixture.Store] as a resource storage.
  * 
- * Subscribes to mocked server events for FeathersJS protocol.
- * 
- * ```
- * var fixtureStore = fixture.store([
- *   {id: 1, title: 'One'},
- *   {id: 2, title: 'Two'},
- *   {id: 3, title: 'Three'}
- * ], new canSet.Algebra({}));
- * 
- * server.onFeathersService("messages", fixtureStore})
- * ```
- * 
- *   @param {String} name The name of Feathers service.
- *   @param {can-fixture.Store} fixtureStore An instance of [can-fixture.Store].
- *   @param {Object} [options] Options, e.g. property name for id.
- * 
- * @body
- * 
- * ## Use
- * 
- * Instantiate fixture store by calling [can-fixture.store] and provide FeathersJS service name:
- * ```js
- * 
- * ```
+ * @param {String} name The name of Feathers service.
+ * @param {can-fixture.Store} fixtureStore An instance of [can-fixture.Store].
+ * @param {Object} [options] Options, e.g. property name for id.
  */
 MockedServer.prototype.onFeathersService = function(serviceName, fixtureStore, options){
 	subscribeFeathersStoreToServer(serviceName, fixtureStore, this, options);

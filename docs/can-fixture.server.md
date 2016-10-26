@@ -51,7 +51,7 @@ socket.emit("some event", "some data", function(data){
 
 ### CRUD service with fixture store
 
-Lets see how we can test a possible implementation of CRUD service that utilizes socket.io ACK callbacks. We will use fixture store to emulate our CRUD storage and link it to our mocked server.
+Lets see how we can test a possible implementation of a CRUD service that utilizes socket.io ACK callbacks. We will use fixture store to emulate our CRUD storage and link it to our mocked server.
 
 ```js
 var fixture = require("can-fixture");

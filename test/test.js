@@ -4,7 +4,7 @@ var fixture = require('can-fixture');
 var extractResponse = require('can-fixture/core').extractResponse;
 var canSet = require("can-set");
 var io = require('socket.io-client');
-var feathers = require('feathers/client')
+var feathers = require('feathers/client');
 var feathersSocketio = require('feathers-socketio/client');
 var hooks = require('feathers-hooks');
 
