@@ -5,9 +5,9 @@
 Intercepts socket.io connection and allows to simulate socket.io server behaviour. 
 
 `can-fixture-socket` exports an object with:
-- [can-fixture-socket.Server] intercepts the socket.io interception;
-- [can-fixture-socket.requestHandlerToListener], a helper to transform XHR request handler into [can-fixture-socket.socket-event-listener]; 
-- [can-fixture-socket.storeToListeners], a helper transform all [can-fixture/StoreType] request handlers into [can-fixture-socket.socket-event-listener].
+- **Server** intercepts the socket.io interception;
+- **requestHandlerToListener** - a helper to transform XHR request handler into [can-fixture-socket.socket-event-listener]; 
+- **storeToListeners** - a helper to transform all [can-fixture.store](http://canjs.github.io/canjs/doc/can-fixture.store.html) request handlers into socket event listeners.
 
 With three simple steps you can test your real-time application that uses socket.io:
 
@@ -115,7 +115,7 @@ With [can-fixture-socket] we can test WebSocket provider of Feathers.
 The mocked server exposes [can-fixture-socket.Server.prototype.onFeathers] method to simulate [FeathersJS](http://feathersjs.com/) CRUD services. As in previous example we can use [can-fixture.store] for CRUD storage:
 ```js
 var fixtureStore = fixture.store([
-  {id: 1, title: One"},
+  {id: 1, title: "One"},
   {id: 2, title: "Two"},
   {id: 3, title: "Three"}
 ], new canSet.Algebra({}));
