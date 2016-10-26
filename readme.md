@@ -155,7 +155,7 @@ With StealJS, you can import this module directly in a template that is autorend
 import plugin from 'can-fixture-socket';
 ```
 
-## AMD use
+### AMD use
 
 Configure the `can` and `jquery` paths and the `can-fixture-socket` package:
 
