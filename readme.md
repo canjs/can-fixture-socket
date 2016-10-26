@@ -5,9 +5,9 @@
 Intercepts socket.io connection and allows to simulate socket.io server behaviour. 
 
 `can-fixture-socket` exports an object with:
-- **Server** intercepts the socket.io interception;
-- **requestHandlerToListener** - a helper to transform XHR request handler into [can-fixture-socket.socket-event-listener]; 
-- **storeToListeners** - a helper to transform all [can-fixture.store](http://canjs.github.io/canjs/doc/can-fixture.store.html) request handlers into socket event listeners.
+- **Server** - a constructor function, intercepts the socket.io connection;
+- **requestHandlerToListener** - a helper, to transforms XHR request handler into [can-fixture-socket.socket-event-listener]; 
+- **storeToListeners** - a helper, transforms all [can-fixture.store](http://canjs.github.io/canjs/doc/can-fixture.store.html) request handlers into socket event listeners.
 
 With three simple steps you can test your real-time application that uses socket.io:
 
@@ -15,9 +15,28 @@ With three simple steps you can test your real-time application that uses socket
  2. mock server behaviour;
  3. test your application.
 
+**Table of Content:**
+
+* [Install](#install)
+* [Usage](#usage)
+  + [Use basics](#use-basics)
+    + [Acknowledgement callbacks](#acknowledgement-callbacks)
+  + [Use with can-fixture.Store](#use-with-can-fixturestore)
+  + [Use with FeathersJS](#use-with-feathersjs)
+* [Contributing](#contributing)
+  + [Making a Build](#making-a-build)
+  + [Running the tests](#running-the-tests)
+
+## Install
+
+Use npm to install can-fixture-socket:
+```
+npm install can-fixture-socket --save
+```
+
 ## Usage
 
-## Use basics
+### Use basics
 
 can-fixture-socket.Server is a constructor that when given socket.io object intercepts socket connection:
 ```js
@@ -46,7 +65,7 @@ socket.on("message created", function(data){
 });
 ```
 
-### Acknowledgement callbacks
+#### Acknowledgement callbacks
 
 We also can use socket.io [acknowledgement callbacks](http://socket.io/docs/#sending-and-getting-data-(acknowledgements)):
 ```js
@@ -68,7 +87,7 @@ socket.on("connect", function(){
 });
 ```
 
-## Use with can-fixture.Store
+### Use with can-fixture.Store
 
 With can-fixture [can-fixture.store] we can create a storage of items and emulate a fully working CRUD service. Optionally we can use [can-set.Algebra] to power our store with binary operations on sets.
 ```js
@@ -106,7 +125,7 @@ mockedServer.on({
 });
 ```
 
-## Use with FeathersJS
+### Use with FeathersJS
 
 Feathers is a minimalist, service-oriented, real-time web framework for modern applications. It is a NodeJS framework built on top of Express. It allows you to build REST-ful services and works with three [providers](https://docs.feathersjs.com/providers/): standard HTTP communication, WebSockets and Primus.
 
