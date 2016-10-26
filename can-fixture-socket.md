@@ -9,13 +9,16 @@ can-fixture-socket intercepts socket.io connection and allows to simulate socket
 
 @type {Object}
 
-`can-fixture-socket` exports an object with a [can-fixture-socket.Server] which implements the socket.io interception, and useful helpers [can-fixture-socket.requestHandlerToListener] and [can-fixture-socket.storeToListeners] which allow to create socket event listeners that work with [can-fixture.Store].
+`can-fixture-socket` exports an object with:
+- [can-fixture-socket.Server] intercepts the socket.io interception;
+- [can-fixture-socket.requestHandlerToListener], a helper to transform XHR request handler into [can-fixture-socket.socket-event-listener]; 
+- [can-fixture-socket.storeToListeners], a helper transform all [can-fixture/StoreType] request handlers into [can-fixture-socket.socket-event-listener].
 
 With three simple steps you can test your real-time application that uses socket.io:
 
-- instantiate server to intercept socket.io;
-- mock server behaviour;
-- test your application.
+ 1. instantiate server to intercept socket.io;
+ 2. mock server behaviour;
+ 3. test your application.
 
 ```js
 var fixtureSocket = require("can-fixture-socket");
@@ -105,6 +108,7 @@ var io = require("socket.io-client");
 
 // Import can-fixture that provides `store` method for creating a store:
 var fixture = require("can-fixture");
+var canSet = require("can-set");
 
 // Create a fixture store:
 var fixtureStore = fixture.store([

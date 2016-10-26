@@ -70,7 +70,6 @@ var MockedServer = function(io){
 MockedServer.prototype.on = function(event, cb){
 	var self = this;
 	var events = {};
-	console.log('server.on ' + event);
 	if (typeof event === 'string'){
 		events[event] = cb;
 	}
@@ -91,18 +90,17 @@ MockedServer.prototype.on = function(event, cb){
  * Emits a socket event.
  *
  * ```js
- * server.emit("news", data, function(...data){
- *   console.log("Client acknowledged");
+ * server.emit("news", data1, data2, function(ackData){
+ *   console.log("Client acknowledged", ackData);
  * });
  * ```
  *
  *   @param {string} event The name of the socket event.
- *   @param {*} data Data to be sent with the event. Could be more than one argument.
+ *   @param {*} data Data to be sent with the event. Socket.io allows to send more than one data objects.
  *   @param {function} [ackFn] The acknowledgement function that will be executed if the receiver calls the acknowledgement callback.
  */
 MockedServer.prototype.emit = function(event){
 	var dataArgs = Array.prototype.slice.call(arguments, 1);
-	//console.log('server.emit ' + event);
 	pub(this.subscribers, event, dataArgs);
 };
 
@@ -136,7 +134,7 @@ MockedServer.prototype.restore = function(){
 	resetManagerCache(this.io.managers);
 };
 
-/**
+/*
  * @constructor can-fixture-socket.Socket Socket
  * @private
  * @parent can-fixture-socket.types
@@ -155,7 +153,7 @@ MockedSocket.prototype = {
 		console.log('MockedSocket.on ... ' + event);
 		sub(this._server.subscribers, event, cb);
 	},
-	/**
+	/*
 	 * The first argument is always `event`
 	 * The middle arguments are data (usually one or two arguments).
 	 * If the last argument is a function then its the ACK callback.
