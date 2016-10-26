@@ -15,7 +15,8 @@ With three simple steps you can test your real-time application that uses socket
  2. mock server behaviour;
  3. test your application.
 
-**Table of Content:**
+
+## Table of Content
 
 * [Install](#install)
 * [Usage](#usage)
@@ -23,9 +24,14 @@ With three simple steps you can test your real-time application that uses socket
     + [Acknowledgement callbacks](#acknowledgement-callbacks)
   + [Use with can-fixture.Store](#use-with-can-fixturestore)
   + [Use with FeathersJS](#use-with-feathersjs)
+  + Other
+    + [ES6 use](#es6-use)
+    + [AMD use](#amd-use)
+    + [Standalone use](#standalone-use)
 * [Contributing](#contributing)
   + [Making a Build](#making-a-build)
   + [Running the tests](#running-the-tests)
+
 
 ## Install
 
