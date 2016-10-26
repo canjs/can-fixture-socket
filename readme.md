@@ -160,7 +160,7 @@ var messagesService = app.service("messages");
 ```
 
 Now you can test your FeathersJS app:
-```
+```js
 messagesService.find({}).then(function(data){
  assert.equal(data.total, 3, "find should receive 3 items");
 });

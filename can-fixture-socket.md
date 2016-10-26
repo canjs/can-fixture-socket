@@ -5,7 +5,7 @@
 
 @description
 
-can-fixture-socket intercepts socket.io connection and allows to simulate socket.io server responses. 
+`can-fixture-socket` intercepts socket.io connection and allows to simulate socket.io server responses. 
 
 @type {Object}
 
@@ -50,7 +50,7 @@ socket.on("notifications", function(data){
 
 ## Use basics
 
-can-fixture-socket.Server is a constructor that when given socket.io object intercepts socket connection:
+`can-fixture-socket.Server` is a constructor that when given socket.io object intercepts socket connection:
 ```js
 var io = require("socket.io-client");
 var fixtureSocket = require("can-fixture-socket");
@@ -122,14 +122,12 @@ var mockedServer = new fixtureSocket.Server(io);
 
 We also can mock server with fixture store using [can-fixture-socket.requestHandlerToListener] helper:
 ```js
-mockedServer.on({
-  "messages get": fixtureSocket.requestHandlerToListener(messagesStore.getData)
-});
+mockedServer.on("messages get", fixtureSocket.requestHandlerToListener( messagesStore.getData ));
 ```
 
 Or use [can-fixture-socket.storeToListeners] helper to wrap all CRUD methods of the fixture store:
 ```js
-var listeners = fixtureSocket.storeToListeners(messagesStore);
+var listeners = fixtureSocket.storeToListeners( messagesStore );
 mockedServer.on({
   "messages remove": listeners.destroyData,
   "messages create": listeners.createData,
@@ -166,7 +164,7 @@ var messagesService = app.service("messages");
 ```
 
 Now you can test your FeathersJS app:
-```
+```js
 messagesService.find({}).then(function(data){
  assert.equal(data.total, 3, "find should receive 3 items");
 });
