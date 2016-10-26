@@ -39,6 +39,8 @@ var MockedServer = function(io){
  * @function can-fixture-socket.Server.prototype.on on
  * @parent can-fixture-socket.Server.prototype
  * 
+ * Adds a socket event listener.
+ * 
  * @signature `server.on(event, handler)`
  * 
  * Adds a socket event listener.
@@ -84,6 +86,8 @@ MockedServer.prototype.on = function(event, cb){
 /**
  * @function can-fixture-socket.Server.prototype.emit emit
  * @parent can-fixture-socket.Server.prototype
+ * 
+ * Emits a socket event.
  *
  * @signature `server.emit(event, ...data, [ackFn])`
  *

@@ -2,6 +2,8 @@
 @parent can-fixture-socket.properties
 @group can-fixture-socket.Server.prototype prototype
 
+Intercepts socket.io connection and allows to mock socket.io server behaviour.
+
 @signature `new Server( io )`
 
 When server is instantiated with socket.io `io` object it intercepts socket.io connection and allows to mock socket.io server behaviour. On instantiation we:
