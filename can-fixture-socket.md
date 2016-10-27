@@ -87,10 +87,6 @@ mockServer.on("messages create", function(data){
 });
 ```
 
-To see this in action:
-
-@demo ..
-
 ### Acknowledgement callbacks
 
 We also can use socket.io [acknowledgement callbacks](http://socket.io/docs/#sending-and-getting-data-(acknowledgements)):

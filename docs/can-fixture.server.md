@@ -2,18 +2,18 @@
 @parent can-fixture-socket.properties
 @group can-fixture-socket.Server.prototype prototype
 
-Intercepts socket.io connection and allows to mock socket.io server behaviour.
+Intercept socket.io messages and simulates socket.io server responses.
 
 @signature `new Server( io )`
 
-When server is instantiated with socket.io `io` object it intercepts socket.io connection and allows to mock socket.io server behaviour. On instantiation we:
+When server is instantiated with socket.io `io` object it intercepts a socket.io connection and allows to mock socket.io server behaviour. On instantiation we:
   - empty `io.managers` object which is a cache of socket.io `io.Manager` instances;
   - override `io.Manager.prototype` to work with current instance of the mocked server.
   
 ```js
 var io = require("socket.io-client");
 var fixtureSocket = require("can-fixture-socket");
-var mockedServer = new fixtureSocket.Server(io);
+var mockServer = new fixtureSocket.Server(io);
 ```
 
 @param {Object} io Imported `socket.io-client` object.
@@ -22,20 +22,20 @@ var mockedServer = new fixtureSocket.Server(io);
 
 ## Use
 
-1. Instantiate server to intercept socket.io connections:
+1. Instantiate a server to intercept socket.io connections:
 ```js
 var io = require("socket.io-client");
 var fixtureSocket = require("can-fixture-socket");
-var mockedServer = new fixtureSocket.Server(io);
+var mockServer = new fixtureSocket.Server(io);
 ```
 
 2. Mock socket.io server behaviour:
 ```js
-mockedServer.on("connection", function(){
-  mockedServer.emit("notifications", [{text: "A new notification"}]);
+mockServer.on("connection", function(){
+  mockServer.emit("notifications", [{text: "A new notification"}]);
 });
 
-mockedServer.on("some event", function(data, ackCb){
+mockServer.on("some event", function(data, ackCb){
   console.log("Client send some ", data);
   ackCb("thanks");
 });
@@ -68,7 +68,7 @@ var fixtureStore = fixture.store([
 // And instantiate a mocked server:
 var io = require("socket.io-client");
 var fixtureSocket = require("can-fixture-socket");
-var mockedServer = new fixtureSocket.Server(io);
+var mockServer = new fixtureSocket.Server(io);
 ```
 
 Fixture store is designed to work with XHR services, thus its methods take two arguments: `request` and `response`. See [can-fixture.Store.prototype.getListData] for more details. Our mocked server can listen to socket events and its event listener expects data and an optional ACK callback. To transform request handler to event listener we can use [can-fixture-socket.requestHandlerToListener]:
