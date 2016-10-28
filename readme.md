@@ -4,10 +4,13 @@
 
 Intercepts socket.io connection and allows to simulate socket.io server behaviour. 
 
-`can-fixture-socket` exports an object with:
-- **Server** - a constructor function, intercepts the socket.io connection;
-- **requestHandlerToListener** - a helper, to transforms XHR request handler into [can-fixture-socket.socket-event-listener]; 
-- **storeToListeners** - a helper, transforms all [can-fixture.store](http://canjs.github.io/canjs/doc/can-fixture.store.html) request handlers into socket event listeners.
+Full documentation is available here: [http://canjs.github.io/canjs/doc/can-fixture-socket.html](http://canjs.github.io/canjs/doc/can-fixture-socket.html).
+
+The `can-fixture-socket` module exports an object with:
+
+- **Server**, a constructor function which instance intercepts a socket.io connection.
+- **requestHandlerToListener**, a helper to convert XHR request handler into [can-fixture-socket.socket-event-listener]. This is useful when using [can-fixture.store](http://canjs.github.io/canjs/doc/can-fixture.store.html) module.
+- **storeToListeners**, a helper to convert all [can-fixture.store](http://canjs.github.io/canjs/doc/can-fixture.store.html) request handlers into socket event listeners.
 
 With three simple steps you can test your real-time application that uses socket.io:
 
@@ -44,22 +47,11 @@ npm install can-fixture-socket --save
 
 ### Use basics
 
-can-fixture-socket.Server is a constructor that when given socket.io object intercepts socket connection:
-```js
-var io = require("socket.io-client");
-var fixtureSocket = require("can-fixture-socket");
-var server = new fixtureSocket.Server(io);
-```
+Lets say we wanted to test a simple app that connects to `socket.io`, and
+once connected, creates a message, and logs when the message is created.
 
-Now we can mock socket server by creating socket event listeners and emitting socket events:
-```js
-server.on("messages create", function(data){
-  console.log("New message received", data);
-  server.emit("message created", data);
-});
-```
+That app could look like the following:
 
-In our client app we use socket.io as usually:
 ```js
 var socket = io();
 socket.on("connect", function(){
@@ -68,6 +60,23 @@ socket.on("connect", function(){
 socket.on("message created", function(data){
   // data.text === "A new message"
   console.log("Server sent out a new message we just created", data);
+});
+```
+
+To test this, we'll first use [can-fixture-socket.Server can-fixture-socket.Server] to intercept the socket connection:
+
+```js
+var io = require("socket.io-client");
+var fixtureSocket = require("can-fixture-socket");
+var mockServer = new fixtureSocket.Server(io);
+```
+
+Now we can mock the socket server by creating socket event listeners and emitting socket events:
+
+```js
+mockServer.on("messages create", function(data){
+  console.log("New message received", data);
+  mockServer.emit("message created", data);
 });
 ```
 
@@ -95,60 +104,51 @@ socket.on("connect", function(){
 
 ### Use with can-fixture.Store
 
-With can-fixture [can-fixture.store] we can create a storage of items and emulate a fully working CRUD service. Optionally we can use [can-set.Algebra] to power our store with binary operations on sets.
-```js
-var fixtureSocket = require("can-fixture-socket");
-var io = require("socket.io-client");
+With can-fixture [can-fixture.store] we can create a store of items and emulate a fully working CRUD service. Optionally, we can use [can-set.Algebra] to power our store filtering, pagination, and sorting abilities.
 
+```js
 // Import can-fixture that provides `store` method for creating a store:
 var fixture = require("can-fixture");
 var canSet = require("can-set");
 
 // Create a fixture store:
-var fixtureStore = fixture.store([
-  {id: 1, title: "One"},
-  {id: 2, title: "Two"},
-  {id: 3, title: "Two"}
+var messagesStore = fixture.store([
+    {id: 1, title: "One"},
+    {id: 2, title: "Two"},
+    {id: 3, title: "Three"}
 ], new canSet.Algebra({}));
-
-var mockedServer = new fixtureSocket.Server(io);
 ```
 
-We also can mock server with fixture store using [can-fixture-socket.requestHandlerToListener] helper:
+We can mock the socket.io connection with the rich behavior of _fixture stores_ using the [can-fixture-socket.requestHandlerToListener] helper.  `requestHandlerToListener`
+converts a _fixture store request handler_ to a _socket.io event listener_.
+
 ```js
-mockedServer.on({
-  "messages get": fixtureSocket.requestHandlerToListener(messagesStore.getData)
-});
+var fixtureSocket = require("can-fixture-socket");
+var io = require("socket.io-client");
+var mockServer = new fixtureSocket.Server(io);
+
+mockServer.on("messages get", fixtureSocket.requestHandlerToListener( messagesStore.getData ));
 ```
 
-Or use [can-fixture-socket.storeToListeners] helper to wrap all CRUD methods of the fixture store:
+Or we can use [can-fixture-socket.storeToListeners] helper to convert all CRUD _fixture store request handlers_ into _socket.io event listeners_:
+
 ```js
-var listeners = fixtureSocket.storeToListeners(messagesStore);
-mockedServer.on({
-  "messages remove": listeners.destroyData,
-  "messages create": listeners.createData,
-  "messages update": listeners.updateData
+var listeners = fixtureSocket.storeToListeners( messagesStore );
+mockServer.on({
+    "messages remove": listeners.destroyData,
+    "messages create": listeners.createData,
+    "messages update": listeners.updateData
 });
 ```
 
 ### Use with FeathersJS
 
-Feathers is a minimalist, service-oriented, real-time web framework for modern applications. It is a NodeJS framework built on top of Express. It allows you to build REST-ful services and works with three [providers](https://docs.feathersjs.com/providers/): standard HTTP communication, WebSockets and Primus.
+[Feathers](http://feathersjs.com/) is a minimalist, service-oriented, real-time web framework for modern applications. It is a NodeJS framework built on top of Express. It allows you to build REST-ful services and works with three [providers](https://docs.feathersjs.com/providers/): standard HTTP communication, WebSockets and Primus.
 
-With [can-fixture-socket] we can test WebSocket provider of Feathers.
+The mocked server exposes [can-fixture-socket.Server.prototype.onFeathers] method to simulate [FeathersJS](http://feathersjs.com/) CRUD services.
 
-The mocked server exposes [can-fixture-socket.Server.prototype.onFeathers] method to simulate [FeathersJS](http://feathersjs.com/) CRUD services. As in previous example we can use [can-fixture.store] for CRUD storage:
-```js
-var fixtureStore = fixture.store([
-  {id: 1, title: "One"},
-  {id: 2, title: "Two"},
-  {id: 3, title: "Three"}
-], new canSet.Algebra({}));
-	
-mockServer.onFeathersService("messages", fixtureStore);
-```
+For example, given the following FeathersJS client app:
 
-Instantiate FeathersJS client app:
 ```js
 var socket = io("http://api.my-feathers-server.com");
 var app = feathers()
@@ -159,16 +159,29 @@ var app = feathers()
 var messagesService = app.service("messages");
 ```
 
+We can simulate it with a [can-fixture.store] as follows:
+
+```js
+var messagesStore = fixture.store([
+    {id: 1, title: "One"},
+    {id: 2, title: "Two"},
+    {id: 3, title: "Three"}
+], new canSet.Algebra({}));
+
+mockServer.onFeathersService("messages", fixtureStore);
+```
+
 Now you can test your FeathersJS app:
+
 ```js
 messagesService.find({}).then(function(data){
- assert.equal(data.total, 3, "find should receive 3 items");
+    assert.equal(data.total, 3, "find should receive 3 items");
 });
 messagesService.get(1).then(function(data){
- assert.deepEqual(data, {id: 1, title: "One"}, "get should receive an item");
+    assert.deepEqual(data, {id: 1, title: "One"}, "get should receive an item");
 });
 messagesService.create({title: "Four"}).then(function(data){
- assert.equal(data.title, "Four", "create should add an new item");
+    assert.equal(data.title, "Four", "create should add an new item");
 });
 ```
 

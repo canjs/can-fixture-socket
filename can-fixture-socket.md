@@ -13,9 +13,9 @@
 
 The `can-fixture-socket` module exports an object with:
 
-- [can-fixture-socket.Server] intercepts the socket.io interception;
-- [can-fixture-socket.requestHandlerToListener], a helper to transform XHR request handler into [can-fixture-socket.socket-event-listener];
-- [can-fixture-socket.storeToListeners], a helper to transform all [can-fixture/StoreType] request handlers into [can-fixture-socket.socket-event-listener].
+- [can-fixture-socket.Server], a constructor function which instance intercepts the socket.io connection;
+- [can-fixture-socket.requestHandlerToListener], a helper to convert XHR request handler into [can-fixture-socket.socket-event-listener];
+- [can-fixture-socket.storeToListeners], a helper to convert all [can-fixture/StoreType] request handlers into [can-fixture-socket.socket-event-listener].
 
 With three simple steps you can test your real-time application that uses socket.io:
 
@@ -86,6 +86,11 @@ mockServer.on("messages create", function(data){
   mockServer.emit("message created", data);
 });
 ```
+
+To see this in action:
+
+@demo demos/can-fixture-socket/basic-app.html
+
 
 ### Acknowledgement callbacks
 
@@ -159,7 +164,6 @@ mockServer.on({
 The mocked server exposes [can-fixture-socket.Server.prototype.onFeathers] method to simulate [FeathersJS](http://feathersjs.com/) CRUD services.
 
 For example, given the following FeathersJS client app:
-
 
 ```js
 var socket = io("http://api.my-feathers-server.com");

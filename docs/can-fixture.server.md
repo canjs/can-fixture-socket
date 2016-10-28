@@ -22,7 +22,7 @@ var mockServer = new fixtureSocket.Server(io);
 
 ## Use
 
-1. Instantiate a server to intercept socket.io connections:
+1. Instantiate a server to intercept socket.io connection:
 ```js
 var io = require("socket.io-client");
 var fixtureSocket = require("can-fixture-socket");
@@ -71,7 +71,7 @@ var fixtureSocket = require("can-fixture-socket");
 var mockServer = new fixtureSocket.Server(io);
 ```
 
-Fixture store is designed to work with XHR services, thus its methods take two arguments: `request` and `response`. See [can-fixture.Store.prototype.getListData] for more details. Our mocked server can listen to socket events and its event listener expects data and an optional ACK callback. To transform request handler to event listener we can use [can-fixture-socket.requestHandlerToListener]:
+Fixture store is designed to work with XHR requests, thus its methods take two arguments: `request` and `response`. See [can-fixture.Store.prototype.getListData] for more details. Our mocked server can listen to socket events and its event listener expects data and an optional ACK callback. To convert a request handler to an event listener we can use [can-fixture-socket.requestHandlerToListener]:
 
 Now we can create socket event listeners for our CRUD operations:
 ```js
@@ -95,7 +95,7 @@ mockServer.on({
 });
 ```
 
-Now lets implement a CRUD model on client. We define that all our ACK callbacks will take first argument as an error, and second as data.
+Now lets implement a CRUD model on our client. We define that all our ACK callbacks take an error as the first argument, and data as the second one.
 ```js
 var socket = io("localhost");
 
