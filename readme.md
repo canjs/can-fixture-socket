@@ -9,7 +9,7 @@ Full documentation is available here: [http://canjs.github.io/canjs/doc/can-fixt
 The `can-fixture-socket` module exports an object with:
 
 - **Server**, a constructor function which instance intercepts a socket.io connection.
-- **requestHandlerToListener**, a helper to convert XHR request handler into [can-fixture-socket.socket-event-listener]. This is useful when using [can-fixture.store](http://canjs.github.io/canjs/doc/can-fixture.store.html) module.
+- **requestHandlerToListener**, a helper to convert XHR request handler into [socket event listener](http://canjs.github.io/canjs/doc/can-fixture-socket.socket-event-listener.html). This is useful when using [can-fixture.store](http://canjs.github.io/canjs/doc/can-fixture.store.html) module.
 - **storeToListeners**, a helper to convert all [can-fixture.store](http://canjs.github.io/canjs/doc/can-fixture.store.html) request handlers into socket event listeners.
 
 With three simple steps you can test your real-time application that uses socket.io:
@@ -63,7 +63,7 @@ socket.on("message created", function(data){
 });
 ```
 
-To test this, we'll first use [can-fixture-socket.Server can-fixture-socket.Server] to intercept the socket connection:
+To test this, we'll first use [can-fixture-socket.Server](http://canjs.github.io/canjs/doc/can-fixture-socket.Server.html) to intercept the socket connection:
 
 ```js
 var io = require("socket.io-client");
@@ -84,27 +84,31 @@ mockServer.on("messages create", function(data){
 
 We also can use socket.io [acknowledgement callbacks](http://socket.io/docs/#sending-and-getting-data-(acknowledgements)):
 ```js
-mockedServer.on("users create", function(user, ackCb){
-  console.log("Save new user to DB and return new user id", user);
-  db.users.create(user).then(function(id){
-    ackCb({id: id});
-  });
+mockServer.on("users create", function(user, ackCb){
+    console.log("Simulating saving a new user to DB and return the new user id", user);
+
+    ackCB({
+        id: Math.random()
+    });
 });
 ```
 
 Client code:
+
 ```js
 var socket = io();
 socket.on("connect", function(){
-  socket.emit("users create", {name: "Ilya", likes: "skiing"}, function (data) {
-    console.log(data.id); // data is what server calls acknowledgement callback with (e.g. data.id is the new user id)
-  });
+    socket.emit("users create", {name: "Ilya", likes: "skiing"}, function (data) {
+        // data is what server calls the acknowledgement callback
+        // with (e.g. data.id is the new user id).
+        console.log(data.id);
+    });
 });
 ```
 
 ### Use with can-fixture.Store
 
-With can-fixture [can-fixture.store] we can create a store of items and emulate a fully working CRUD service. Optionally, we can use [can-set.Algebra] to power our store filtering, pagination, and sorting abilities.
+With can-fixture [can-fixture.store](http://canjs.github.io/canjs/doc/can-fixture.store.html) we can create a store of items and emulate a fully working CRUD service. Optionally, we can use [can-set.Algebra](http://canjs.github.io/canjs/doc/can-set.html) to power our store filtering, pagination, and sorting abilities.
 
 ```js
 // Import can-fixture that provides `store` method for creating a store:
@@ -119,18 +123,19 @@ var messagesStore = fixture.store([
 ], new canSet.Algebra({}));
 ```
 
-We can mock the socket.io connection with the rich behavior of _fixture stores_ using the [can-fixture-socket.requestHandlerToListener] helper.  `requestHandlerToListener`
-converts a _fixture store request handler_ to a _socket.io event listener_.
+We can mock the socket.io connection with the rich behavior of _fixture stores_ using the [requestHandlerToListener](http://canjs.github.io/canjs/doc/can-fixture-socket.requestHandlerToListener.html) helper.  The `requestHandlerToListener` function
+converts a _fixture store request handler_ (e.g. [getListData](http://canjs.github.io/canjs/doc/can-fixture/StoreType.prototype.getListData.html)) to a _[socket.io event listener](http://canjs.github.io/canjs/doc/can-fixture-socket.socket-event-listener.html)_.
 
 ```js
 var fixtureSocket = require("can-fixture-socket");
 var io = require("socket.io-client");
 var mockServer = new fixtureSocket.Server(io);
 
-mockServer.on("messages get", fixtureSocket.requestHandlerToListener( messagesStore.getData ));
+var toListener = fixtureSocket.requestHandlerToListener;
+mockServer.on("messages get", toListener( messagesStore.getData ));
 ```
 
-Or we can use [can-fixture-socket.storeToListeners] helper to convert all CRUD _fixture store request handlers_ into _socket.io event listeners_:
+Or we can use [storeToListeners](http://canjs.github.io/canjs/doc/can-fixture-socket.storeToListeners.html) helper to convert all CRUD _fixture store request handlers_ into _socket.io event listeners_:
 
 ```js
 var listeners = fixtureSocket.storeToListeners( messagesStore );
@@ -143,9 +148,9 @@ mockServer.on({
 
 ### Use with FeathersJS
 
-[Feathers](http://feathersjs.com/) is a minimalist, service-oriented, real-time web framework for modern applications. It is a NodeJS framework built on top of Express. It allows you to build REST-ful services and works with three [providers](https://docs.feathersjs.com/providers/): standard HTTP communication, WebSockets and Primus.
+[FeathersJS](http://feathersjs.com/) is a minimalist, service-oriented, real-time web framework for modern applications. It is a NodeJS framework built on top of Express. It allows you to build REST-ful services and works with three [providers](https://docs.feathersjs.com/providers/): standard HTTP communication, WebSockets and Primus.
 
-The mocked server exposes [can-fixture-socket.Server.prototype.onFeathers] method to simulate [FeathersJS](http://feathersjs.com/) CRUD services.
+The mocked server exposes [onFeathersService](http://canjs.github.io/canjs/doc/can-fixture-socket.Server.prototype.onFeathersService.html) method to simulate [FeathersJS](http://feathersjs.com/) CRUD services.
 
 For example, given the following FeathersJS client app:
 
@@ -159,7 +164,7 @@ var app = feathers()
 var messagesService = app.service("messages");
 ```
 
-We can simulate it with a [can-fixture.store] as follows:
+We can simulate it with a [can-fixture.store](http://canjs.github.io/canjs/doc/can-fixture.store.html) as follows:
 
 ```js
 var messagesStore = fixture.store([
