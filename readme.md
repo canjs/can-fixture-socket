@@ -85,11 +85,11 @@ mockServer.on("messages create", function(data){
 We also can use socket.io [acknowledgement callbacks](http://socket.io/docs/#sending-and-getting-data-(acknowledgements)):
 ```js
 mockServer.on("users create", function(user, ackCb){
-    console.log("Simulating saving a new user to DB and return the new user id", user);
+  console.log("Simulating saving a new user to DB and return the new user id", user);
 
-    ackCB({
-        id: Math.random()
-    });
+  ackCB({
+    id: Math.random()
+  });
 });
 ```
 
@@ -98,11 +98,11 @@ Client code:
 ```js
 var socket = io();
 socket.on("connect", function(){
-    socket.emit("users create", {name: "Ilya", likes: "skiing"}, function (data) {
-        // data is what server calls the acknowledgement callback
-        // with (e.g. data.id is the new user id).
-        console.log(data.id);
-    });
+  socket.emit("users create", {name: "Ilya", likes: "skiing"}, function (data) {
+    // data is what server calls the acknowledgement callback
+    // with (e.g. data.id is the new user id).
+    console.log(data.id);
+  });
 });
 ```
 
@@ -117,9 +117,9 @@ var canSet = require("can-set");
 
 // Create a fixture store:
 var messagesStore = fixture.store([
-    {id: 1, title: "One"},
-    {id: 2, title: "Two"},
-    {id: 3, title: "Three"}
+  {id: 1, title: "One"},
+  {id: 2, title: "Two"},
+  {id: 3, title: "Three"}
 ], new canSet.Algebra({}));
 ```
 
@@ -140,9 +140,9 @@ Or we can use [storeToListeners](http://canjs.github.io/canjs/doc/can-fixture-so
 ```js
 var listeners = fixtureSocket.storeToListeners( messagesStore );
 mockServer.on({
-    "messages remove": listeners.destroyData,
-    "messages create": listeners.createData,
-    "messages update": listeners.updateData
+  "messages remove": listeners.destroyData,
+  "messages create": listeners.createData,
+  "messages update": listeners.updateData
 });
 ```
 
@@ -168,9 +168,9 @@ We can simulate it with a [can-fixture.store](http://canjs.github.io/canjs/doc/c
 
 ```js
 var messagesStore = fixture.store([
-    {id: 1, title: "One"},
-    {id: 2, title: "Two"},
-    {id: 3, title: "Three"}
+  {id: 1, title: "One"},
+  {id: 2, title: "Two"},
+  {id: 3, title: "Three"}
 ], new canSet.Algebra({}));
 
 mockServer.onFeathersService("messages", fixtureStore);
@@ -180,13 +180,13 @@ Now you can test your FeathersJS app:
 
 ```js
 messagesService.find({}).then(function(data){
-    assert.equal(data.total, 3, "find should receive 3 items");
+  assert.equal(data.total, 3, "find should receive 3 items");
 });
 messagesService.get(1).then(function(data){
-    assert.deepEqual(data, {id: 1, title: "One"}, "get should receive an item");
+  assert.deepEqual(data, {id: 1, title: "One"}, "get should receive an item");
 });
 messagesService.create({title: "Four"}).then(function(data){
-    assert.equal(data.title, "Four", "create should add an new item");
+  assert.equal(data.title, "Four", "create should add an new item");
 });
 ```
 
@@ -205,18 +205,18 @@ Configure the `can` and `jquery` paths and the `can-fixture-socket` package:
 ```html
 <script src="require.js"></script>
 <script>
-	require.config({
-	    paths: {
-	        "jquery": "node_modules/jquery/dist/jquery",
-	        "can": "node_modules/canjs/dist/amd/can"
-	    },
-	    packages: [{
-		    	name: 'can-fixture-socket',
-		    	location: 'node_modules/can-fixture-socket/dist/amd',
-		    	main: 'lib/can-fixture-socket'
-	    }]
-	});
-	require(["main-amd"], function(){});
+  require.config({
+    paths: {
+      "jquery": "node_modules/jquery/dist/jquery",
+      "can": "node_modules/canjs/dist/amd/can"
+    },
+    packages: [{
+      name: 'can-fixture-socket',
+      location: 'node_modules/can-fixture-socket/dist/amd',
+      main: 'lib/can-fixture-socket'
+    }]
+  });
+  require(["main-amd"], function(){});
 </script>
 ```
 
