@@ -27,16 +27,6 @@
     "develop": "done-serve --static --develop --port 8080"
   },
   "main": "can-fixture-socket",
-  "browser": {
-    "transform": [
-      "cssify"
-    ]
-  },
-  "browserify": {
-    "transform": [
-      "cssify"
-    ]
-  },
   "keywords": [
     "Done",
     "JS",
@@ -63,7 +53,6 @@
   },
   "devDependencies": {
     "can-set": "^1.0.0",
-    "cssify": "^0.6.0",
     "documentjs": "^0.4.4",
     "done-serve": "^0.3.0-pre.0",
     "donejs-cli": "^0.10.0-pre.0",
