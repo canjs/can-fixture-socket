@@ -1,5 +1,6 @@
 @module {Object} can-fixture-socket
 @parent can-ecosystem
+@package ./package.json
 @group can-fixture-socket.properties properties
 @group can-fixture-socket.types types
 

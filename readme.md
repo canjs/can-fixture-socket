@@ -1,8 +1,8 @@
-# can-fixture-socket
-
 [![Build Status](https://travis-ci.org/canjs/can-fixture-socket.png?branch=master)](https://travis-ci.org/canjs/can-fixture-socket)
 
-Intercepts socket.io connection and allows to simulate socket.io server behaviour. 
+# can-fixture-socket
+
+Intercepts socket.io connection and allows to simulate socket.io server behaviour.
 
 Full documentation is available here: [http://canjs.github.io/canjs/doc/can-fixture-socket.html](http://canjs.github.io/canjs/doc/can-fixture-socket.html).
 
