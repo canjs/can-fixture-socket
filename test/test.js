@@ -42,7 +42,7 @@ QUnit.test('basic connection', function(assert){
 	assert.expect(2);
 	var socket = io('http://localhost:8080/api');
 	socket.on('connect', function(){
-		assert.ok(true, 'socket connected');
+		assert.ok(socket.connected, 'socket connected');
 	});
 	socket.on('notifications', function(data){
 		assert.deepEqual(data, {test: 'OK'}, 'received notifications message');
