@@ -217,7 +217,10 @@ function mockManager(managerProto, server){
 	};
 	managerProto.socket = function(){
 		debug('MockedManager.prototype.socket ...');
-		return new MockedSocket(server);
+		var socket = new MockedSocket(server);
+		socket.connected = true;
+		socket.disconnected = false;
+		return socket;
 	};
 	return origs;
 }
