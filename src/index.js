@@ -154,7 +154,7 @@ var MockedSocket = function(server){
 };
 MockedSocket.prototype = {
 	on: function(event, cb){
-		console.log('MockedSocket.on ... ' + event);
+		debug('MockedSocket.on ... ' + event);
 		sub(this._server.subscribers, event, cb);
 	},
 	/*
@@ -164,11 +164,11 @@ MockedSocket.prototype = {
      */
 	emit: function(event){
 		var dataArgs = Array.prototype.slice.call(arguments, 1);
-		console.log('MockedSocket.emit ...' + event);
+		debug('MockedSocket.emit ...' + event);
 		pub(this._server.events, event, dataArgs);
 	},
 	once: function(){
-		console.log('MockedSocket.once ...');
+		debug('MockedSocket.once ...');
 	}
 };
 
@@ -179,14 +179,14 @@ MockedSocket.prototype = {
  * @param dataArgs There could be either one or more data arguments (e.g. FeathersJS) and the last argument can be used for ACK callback. 
  */
 function pub(pubsub, event, dataArgs){
-	console.log(' >>> pub ' + event);
+	debug(' >>> pub ' + event);
 	var subscribers = pubsub[event] || [];
 	subscribers.forEach(function(subscriber){
 		subscriber.apply(null, dataArgs);
 	});
 }
 function sub(pubsub, event, cb){
-	console.log(' <<< sub ' + event);
+	debug(' <<< sub ' + event);
 	if (!pubsub[event]){
 		pubsub[event] = [];
 	}
@@ -209,14 +209,14 @@ function mockManager(managerProto, server){
 		};
 	});
 	managerProto.open = managerProto.connect = function(){
-		console.log('MockedManager.prototype.open or connect ... arguments:', arguments);
+		debug('MockedManager.prototype.open or connect ... arguments:', arguments);
 		setTimeout(function(){
 			pub(server.subscribers, 'connect');
 			pub(server.events, 'connection');
 		}, 0);
 	};
 	managerProto.socket = function(){
-		console.log('MockedManager.prototype.socket ...');
+		debug('MockedManager.prototype.socket ...');
 		return new MockedSocket(server);
 	};
 	return origs;
@@ -228,7 +228,7 @@ function mockManager(managerProto, server){
  * @param origs
  */
 function restoreManager(managerProto, origs){
-	console.log('Restore.');
+	debug('Restore.');
 	origs.forEach(function(orig){
 		managerProto[orig.name] = orig.method;
 	});
@@ -243,6 +243,13 @@ function resetManagerCache(cache){
 		if (cache.hasOwnProperty(i)){
 			delete cache[i];
 		}
+	}
+}
+
+var _DEBUG = false;
+function debug(msg, obj){
+	if (_DEBUG){
+		console.log.apply(console, arguments);
 	}
 }
 
