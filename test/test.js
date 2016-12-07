@@ -53,10 +53,16 @@ QUnit.test('basic connection', function(assert){
 		assert.equal(socket.connected, true, 'socket connected');
 		assert.equal(socket.disconnected, false, 'socket.disconnected is false because it is connected');
 	});
-	socket.on('notifications', function(data){
+	var notificationHandler = function(data){
 		assert.deepEqual(data, {test: 'OK'}, 'received notifications message');
+		// Unsubscribe after  we recieve the notification message.
+		socket.off('notifications', notificationHandler);
+		// Emit another notifications message from the server.  
+		// If we successfully unsubscribed, then assert.expect(7) should pass.
+		mockServer.emit('notifications', {test: 'No K.'});
 		done();
-	});
+	};
+	socket.on('notifications', notificationHandler);
 });
 
 /**
