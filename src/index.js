@@ -169,6 +169,18 @@ MockedSocket.prototype = {
 	},
 	once: function(){
 		debug('MockedSocket.once ...');
+	},
+	off: function(event, cb){
+		debug('MockedSocket.off ... ' + event);
+		unsub(this._server.subscribers, event, cb);
+	},
+	connect: function(){
+		this.connected = true;
+		this.disconnected = false;
+	},
+	disconnect: function(){
+		this.connected = false;
+		this.disconnected = true;
 	}
 };
 
@@ -191,6 +203,14 @@ function sub(pubsub, event, cb){
 		pubsub[event] = [];
 	}
 	pubsub[event].push(cb);
+}
+function unsub(pubsub, event, cb){
+	debug(' <<< unsub ' + event);
+	pubsub[event].forEach(function(registeredCb, index){
+		if(registeredCb === cb){
+			pubsub[event].splice(index, 1);
+		}
+	});
 }
 
 /*
