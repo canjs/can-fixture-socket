@@ -39,10 +39,19 @@ QUnit.test('basic connection', function(assert){
 	// Test client:
 	//
 	var done = assert.async();
-	assert.expect(2);
+	assert.expect(7);
 	var socket = io('http://localhost:8080/api');
 	socket.on('connect', function(){
-		assert.ok(socket.connected, 'socket connected');
+		assert.equal(socket.connected, true, 'socket connected');
+		assert.equal(socket.disconnected, false, 'socket.disconnected is false because it is connected');
+
+		socket.disconnect();
+		assert.equal(socket.connected, false, 'socket is disconnected');
+		assert.equal(socket.disconnected, true, 'socket.disconnected is true because it is connected');
+
+		socket.connect();
+		assert.equal(socket.connected, true, 'socket connected');
+		assert.equal(socket.disconnected, false, 'socket.disconnected is false because it is connected');
 	});
 	socket.on('notifications', function(data){
 		assert.deepEqual(data, {test: 'OK'}, 'received notifications message');
