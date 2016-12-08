@@ -174,14 +174,21 @@ MockedSocket.prototype = {
 		debug('MockedSocket.off ... ' + event);
 		unsub(this._server.subscribers, event, cb);
 	},
+	open: function(){
+		return this.connect();
+	},
 	connect: function(){
 		this.connected = true;
 		this.disconnected = false;
 	},
+	close: function(){
+		return this.disconnect();
+	},
 	disconnect: function(){
 		this.connected = false;
 		this.disconnected = true;
-	}
+	},
+
 };
 
 /*
