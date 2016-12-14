@@ -65,7 +65,7 @@
     "object-assign": "^4.1.0",
     "socket.io-client": "^1.5.0",
     "steal": "^0.16.41",
-    "steal-qunit": "^0.1.4",
+    "steal-qunit": "^1.0.0",
     "steal-tools": "^0.16.8",
     "testee": "^0.3.0"
   }
