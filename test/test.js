@@ -39,7 +39,7 @@ QUnit.test('basic connection', function(assert){
 	// Test client:
 	//
 	var done = assert.async();
-	assert.expect(11);
+	assert.expect(13);
 	var socket = io('http://localhost:8080/api');
 	socket.on('connect', function(){
 		assert.equal(socket.connected, true, 'socket connected');
@@ -49,6 +49,8 @@ QUnit.test('basic connection', function(assert){
 		assert.ok(socket.connect, 'connect method exists');
 		assert.ok(socket.close, 'close method exists');
 		assert.ok(socket.disconnect, 'disconnect method exists');
+		assert.ok(socket.io, 'io object is attached');
+		assert.equal(socket.io.engine, socket, 'socket.io.engine is a reference to socket (for methods like on)');
 
 		socket.disconnect();
 		assert.equal(socket.connected, false, 'socket is disconnected');
