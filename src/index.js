@@ -151,6 +151,9 @@ MockedServer.prototype.restore = function(){
  */
 var MockedSocket = function(server){
 	this._server = server;
+	this.io = {
+		engine: this
+	};
 };
 MockedSocket.prototype = {
 	on: function(event, cb){
@@ -188,7 +191,6 @@ MockedSocket.prototype = {
 		this.connected = false;
 		this.disconnected = true;
 	},
-
 };
 
 /*
