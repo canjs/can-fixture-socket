@@ -33,7 +33,7 @@
     "Can",
     "JS"
   ],
-  "system": {
+  "steal": {
     "main": "can-fixture-socket",
     "configDependencies": [
       "live-reload"
@@ -44,8 +44,7 @@
       "generator-donejs",
       "donejs-cli",
       "steal-tools"
-    ],
-    "npmAlgorithm": "flat"
+    ]
   },
   "dependencies": {
     "can-fixture": "^1.0.0",
@@ -64,9 +63,9 @@
     "jshint": "^2.9.1",
     "object-assign": "^4.1.0",
     "socket.io-client": "^1.5.0",
-    "steal": "^0.16.41",
-    "steal-qunit": "^0.1.4",
-    "steal-tools": "^0.16.8",
-    "testee": "^0.3.0"
+    "steal": "^1.2.8",
+    "steal-qunit": "^1.0.1",
+    "steal-tools": "^1.1.2",
+    "testee": "^0.3.1"
   }
 }
