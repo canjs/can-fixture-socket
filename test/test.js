@@ -5,11 +5,11 @@ var fixtureSocket = require('can-fixture-socket');
 var fixture = require('can-fixture');
 var extractResponse = require('can-fixture/core').extractResponse;
 var canSet = require("can-set");
-var io = require('socket.io-client');
+var io = require('socket.io-client/dist/socket.io');
 var feathers = require('feathers/client');
 var feathersSocketio = require('feathers-socketio/client');
 var hooks = require('feathers-hooks');
-var log = require('can-util/js/log/log');
+var logger = require('can-util/js/log/log');
 
 // Polyfills for Travis:
 var Promise = require('es6-promise-polyfill');
@@ -331,7 +331,7 @@ QUnit.test('FeathersJS REST service', function(assert){
 	]).then(function(){
 		done();
 	}).catch(function(err){
-		log('ERROR final test failed', err);
+		logger.log('ERROR final test failed', err);
 		done();
 	});
 });

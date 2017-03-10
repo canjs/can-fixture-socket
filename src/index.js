@@ -1,4 +1,4 @@
-var log = require('can-util/js/log/log');
+var logger = require('can-util/js/log/log');
 var makeArray = require('can-util/js/make-array/make-array');
 
 /*
@@ -284,7 +284,7 @@ function resetManagerCache(cache){
 var _DEBUG = false;
 function debug(msg, obj){
 	if (_DEBUG){
-		log(makeArray(arguments));
+		logger.log.apply(logger, makeArray(arguments));
 	}
 }
 
