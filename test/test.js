@@ -1,3 +1,5 @@
+require('babel-polyfill/browser');
+
 var QUnit = require('steal-qunit');
 var fixtureSocket = require('can-fixture-socket');
 var fixture = require('can-fixture');
@@ -7,6 +9,7 @@ var io = require('socket.io-client');
 var feathers = require('feathers/client');
 var feathersSocketio = require('feathers-socketio/client');
 var hooks = require('feathers-hooks');
+var log = require('can-util/js/log/log');
 
 // Polyfills for Travis:
 var Promise = require('es6-promise-polyfill');
@@ -79,7 +82,6 @@ QUnit.test('basic connection', function(assert){
  * - on deleted send ACK with {success: true} and emit deleted event with the removed message id.
  */
 QUnit.test('CRUD service', function(assert){
-	console.log('Started test 2');
 	//
 	// Mock server:
 	//
@@ -329,7 +331,7 @@ QUnit.test('FeathersJS REST service', function(assert){
 	]).then(function(){
 		done();
 	}).catch(function(err){
-		console.log('ERROR final test failed', err);
+		log('ERROR final test failed', err);
 		done();
-	})
+	});
 });

@@ -51,6 +51,7 @@
     "can-util": "^3.0.0"
   },
   "devDependencies": {
+    "babel-polyfill": "^6.23.0",
     "can-set": "^1.0.0",
     "documentjs": "^0.4.4",
     "done-serve": "^0.3.0-pre.0",
