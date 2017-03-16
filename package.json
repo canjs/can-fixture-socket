@@ -53,7 +53,7 @@
   "devDependencies": {
     "can-set": "^1.0.0",
     "documentjs": "^0.4.4",
-    "done-serve": "^0.3.0-pre.0",
+    "done-serve": "^1.0.0",
     "donejs-cli": "^0.10.0-pre.0",
     "es6-promise-polyfill": "^1.2.0",
     "feathers": "^2.0.2",
