@@ -57,7 +57,7 @@
     "donejs-cli": "^0.10.0-pre.0",
     "es6-promise-polyfill": "^1.2.0",
     "feathers": "^2.0.2",
-    "feathers-hooks": "^1.5.8",
+    "feathers-hooks": "^2.0.0",
     "feathers-socketio": "^1.4.1",
     "generator-donejs": "^0.10.0-pre.0",
     "jshint": "^2.9.1",
