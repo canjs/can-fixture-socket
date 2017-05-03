@@ -2,6 +2,8 @@
 
 # can-fixture-socket
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/canjs/can-fixture-socket.svg)](https://greenkeeper.io/)
+
 Intercepts socket.io connection and allows to simulate socket.io server behaviour.
 
 Full documentation is available here: [http://canjs.github.io/canjs/doc/can-fixture-socket.html](http://canjs.github.io/canjs/doc/can-fixture-socket.html).
