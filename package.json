@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "can-fixture": "^1.0.0",
-    "can-util": "^3.0.0"
+    "can-util": "3.6.1"
   },
   "devDependencies": {
     "can-set": "^1.0.0",
