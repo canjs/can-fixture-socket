@@ -62,7 +62,7 @@
     "generator-donejs": "^0.10.0-pre.0",
     "jshint": "^2.9.1",
     "object-assign": "^4.1.0",
-    "socket.io-client": "^1.5.0",
+    "socket.io-client": "1.7.3",
     "steal": "^1.2.8",
     "steal-qunit": "^1.0.1",
     "steal-tools": "^1.1.2",
