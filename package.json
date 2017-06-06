@@ -15,10 +15,11 @@
   "scripts": {
     "preversion": "npm test && npm run build",
     "version": "git commit -am \"Update dist for release\" && git checkout -b release && git add -f dist/",
-    "postversion": "git push --tags && git checkout master && git branch -D release && git push",
+    "postversion": "git push --tags && git checkout can-reflect && git branch -D release && git push",
     "testee": "testee test/test.html --browsers firefox",
     "test": "npm run jshint && npm run testee",
     "jshint": "jshint ./*.js --config",
+    "release:pre": "npm version prerelease && npm publish --tag=pre",
     "release:patch": "npm version patch && npm publish",
     "release:minor": "npm version minor && npm publish",
     "release:major": "npm version major && npm publish",
@@ -47,7 +48,7 @@
     ]
   },
   "dependencies": {
-    "can-fixture": "^1.0.0",
+    "can-fixture": "^1.1.0-pre.0",
     "can-util": "^3.0.0"
   },
   "devDependencies": {
@@ -66,6 +67,6 @@
     "steal": "^1.2.8",
     "steal-qunit": "^1.0.1",
     "steal-tools": "^1.1.2",
-    "testee": "^0.5.0"
+    "testee": "^0.6.0"
   }
 }
