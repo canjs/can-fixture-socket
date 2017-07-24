@@ -60,7 +60,7 @@
     "feathers": "^2.0.2",
     "feathers-hooks": "^2.0.1",
     "feathers-socketio": "^1.4.1",
-    "generator-donejs": "^1.0.5",
+    "generator-donejs": "^1.0.7",
     "jshint": "^2.9.1",
     "object-assign": "^4.1.0",
     "socket.io-client": "^1.5.0",
