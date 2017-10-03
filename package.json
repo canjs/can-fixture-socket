@@ -17,14 +17,15 @@
     "version": "git commit -am \"Update dist for release\" && git checkout -b release && git add -f dist/",
     "postversion": "git push --tags && git checkout master && git branch -D release && git push",
     "testee": "testee test/test.html --browsers firefox",
-    "test": "npm run jshint && npm run testee",
+    "test": "npm run detect-cycle && npm run jshint && npm run testee",
     "jshint": "jshint ./*.js --config",
     "release:pre": "npm version prerelease && npm publish --tag=pre",
     "release:patch": "npm version patch && npm publish",
     "release:minor": "npm version minor && npm publish",
     "release:major": "npm version major && npm publish",
     "build": "node build.js",
-    "develop": "done-serve --static --develop --port 8080"
+    "develop": "done-serve --static --develop --port 8080",
+    "detect-cycle": "detect-cyclic-packages --ignore done-serve"
   },
   "main": "can-fixture-socket",
   "keywords": [
@@ -52,6 +53,7 @@
   },
   "devDependencies": {
     "can-set": "^1.3.0",
+    "detect-cyclic-packages": "^1.1.0",
     "documentjs": "^0.4.4",
     "done-serve": "^1.2.0",
     "donejs-cli": "^1.0.1",
