@@ -48,6 +48,7 @@ var assign = require('can-util/js/assign/assign');
  * @param mockServer
  * @param options
  * @returns {*}
+ * @hide
  *
  * fixture.store data:
  * 		getListData: {}
