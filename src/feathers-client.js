@@ -48,6 +48,7 @@ var assign = require('can-util/js/assign/assign');
  * @param mockServer
  * @param options
  * @returns {*}
+ * @hide
  *
  * fixture.store data:
  * 		getListData: {}
@@ -88,6 +89,7 @@ function toFeathersDataHandler(method, queryTransformer, dataTransformer){
  * Wraps given id into an object with property name `id` (or options.id).
  * @param options
  * @returns {Function}
+ * @hide
  */
 function wrapToId(options){
 	return function(id){
@@ -125,6 +127,7 @@ function toFeathersFind(data){
  * @param destroyData The wrapped fixture.store.destroyData method.
  * @param getData The wrapped fixture.store.getData method.
  * @returns {Function}
+ * @hide
  */
 function toFeathersRemoveHandler(getData, destroyData, options){
 	return function(id, query, fn){
