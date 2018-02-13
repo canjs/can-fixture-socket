@@ -7,7 +7,7 @@
 
 Socket event listener handler expects one or more data arguments and an optional ACK callback.
 
-```js
+```javascript
 // Client:
 socket.on("news", function handler(data, ackCb){
   console.log("received some news", data);

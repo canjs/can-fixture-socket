@@ -26,8 +26,8 @@ server.onFeathersService("messages", fixtureStore})
 ## Use
 
 Instantiate fixture store by calling [can-fixture.store] and provide FeathersJS service name:
-```js
-var fixtureStore = fixture.store([
+```javascript
+const fixtureStore = fixture.store([
   {_id: 1, title: 'One'},
   {_id: 2, title: 'Two'},
   {_id: 3, title: 'Three'}
@@ -39,21 +39,22 @@ mockServer.onFeathersService('messages', fixtureStore, {id: "_id"});
 This will emulate FeathersJS server CRUD service.
 
 Now from Feathers client app you can do:
-```js
+```javascript
 // Import dependencies:
-var io = require("socket.io-client");
-var feathers = require('feathers/client');
-var feathersSocketio = require('feathers-socketio/client');
-var hooks = require('feathers-hooks');
+import io from "socket.io-client";
+
+import feathers from 'feathers/client';
+import feathersSocketio from 'feathers-socketio/client';
+import hooks from 'feathers-hooks';
 
 // Configure Feathers client app:
-var socket = io("http://api.my-feathers-server.com");
-var app = feathers()
+const socket = io("http://api.my-feathers-server.com");
+const app = feathers()
   .configure(hooks())
   .configure(feathersSocketio(socket));
 
 // Create client Feathers service:
-var messagesService = app.service('messages');
+const messagesService = app.service('messages');
 
 // Test:
 messagesService.get(1).then(function(data){
