@@ -10,7 +10,7 @@ When server is instantiated with socket.io `io` object it intercepts a socket.io
   - empty `io.managers` object which is a cache of socket.io `io.Manager` instances;
   - override `io.Manager.prototype` to work with current instance of the mocked server.
 
-```javascript
+```js
 import io from "socket.io-client";
 import fixtureSocket from "can-fixture-socket";
 const mockServer = new fixtureSocket.Server(io);
@@ -23,29 +23,29 @@ const mockServer = new fixtureSocket.Server(io);
 ## Use
 
 1. Instantiate a server to intercept socket.io connection:
-```javascript
+```js
 import io from "socket.io-client";
 import fixtureSocket from "can-fixture-socket";
 const mockServer = new fixtureSocket.Server(io);
 ```
 
 2. Mock socket.io server behaviour:
-```javascript
+```js
 mockServer.on("connection", function(){
-  mockServer.emit("notifications", [{text: "A new notification"}]);
+	mockServer.emit("notifications", [{text: "A new notification"}]);
 });
 
 mockServer.on("some event", function(data, ackCb){
-  console.log("Client send some ", data);
-  ackCb("thanks");
+	console.log("Client send some ", data);
+	ackCb("thanks");
 });
 ```
 
 3. Test your client app:
-```javascript
+```js
 const socket = io("http://localhost:8080/ws");
 socket.emit("some event", "some data", function(data){
-  assert.equal(data, "thanks", "Server acknowledged our event");
+	assert.equal(data, "thanks", "Server acknowledged our event");
 });
 ```
 
@@ -55,14 +55,14 @@ socket.emit("some event", "some data", function(data){
 
 Lets see how we can test a possible implementation of a CRUD service that utilizes socket.io ACK callbacks. We will use fixture store to emulate our CRUD storage and link it to our mocked server.
 
-```javascript
+```js
 import fixture from "can-fixture";
 
 // First, lets create fixture store:
 const fixtureStore = fixture.store([
-  {id: 1, title: "One", rank: "good"},
-  {id: 2, title: "Two", rank: "average"},
-  {id: 3, title: "Three", rank: "good"}
+	{id: 1, title: "One", rank: "good"},
+	{id: 2, title: "Two", rank: "average"},
+	{id: 3, title: "Three", rank: "good"}
 ], new canSet.Algebra({}));
 
 // And instantiate a mocked server:
@@ -75,7 +75,7 @@ const mockServer = new fixtureSocket.Server(io);
 Fixture store is designed to work with XHR requests, thus its methods take two arguments: `request` and `response`. See [can-fixture.Store.prototype.getListData] for more details. Our mocked server can listen to socket events and its event listener expects data and an optional ACK callback. To convert a request handler to an event listener we can use [can-fixture-socket.requestHandlerToListener]:
 
 Now we can create socket event listeners for our CRUD operations:
-```javascript
+```js
 const toListener = fixtureSocket.requestHandlerToListener;
 mockServer.on("messages find",   toListener( fixtureStore.getListData ));
 mockServer.on("messages get",    toListener( fixtureStore.getData     ));
@@ -97,28 +97,28 @@ mockServer.on({
 ```
 
 Now lets implement a CRUD model on our client. We define that all our ACK callbacks take an error as the first argument, and data as the second one.
-```javascript
+```js
 const socket = io("localhost");
 
 socket.emit("messages find", {rank: "good"}, function(err, response){
-  if (err){
-    console.log("Error: ", err);
-    return;
-  }
-  console.log(`We found ${response.count} good items`, response.data);
-  assert.equal(response.count, 3)
+	if (err){
+		console.log("Error: ", err);
+		return;
+	}
+	console.log(`We found ${response.count} good items`, response.data);
+	assert.equal(response.count, 3)
 });
 ```
 
 Now lets test the rest of the methods:
-```javascript
+```js
 socket.emit("messages get", {id: 1}, function(err, data){s
-  assert.deepEqual(data, {id: 1, title: "One"}, "received the item");
+	assert.deepEqual(data, {id: 1, title: "One"}, "received the item");
 });
 socket.emit("messages update", {id: 2, title: "TwoPlus"}, function(err, data){
-  assert.deepEqual(data, {id: 2, title: "TwoPlus"}, "received the updated item");
+	assert.deepEqual(data, {id: 2, title: "TwoPlus"}, "received the updated item");
 });
 socket.emit("messages get", {id: 999}, function(err, data){
-  assert.deepEqual(err, {error: 404, message: "no data"}, "received 404 when looking for a non-existent item id");
+	assert.deepEqual(err, {error: 404, message: "no data"}, "received 404 when looking for a non-existent item id");
 });
 ```
