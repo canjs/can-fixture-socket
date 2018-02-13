@@ -32,7 +32,7 @@ var fixtureStore = fixture.store([
   {_id: 2, title: 'Two'},
   {_id: 3, title: 'Three'}
 ], new canSet.Algebra(canSet.props.id('_id')));
- *
+
 mockServer.onFeathersService('messages', fixtureStore, {id: "_id"});
 ```
 

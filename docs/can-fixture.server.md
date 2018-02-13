@@ -9,7 +9,7 @@ Intercept socket.io messages and simulates socket.io server responses.
 When server is instantiated with socket.io `io` object it intercepts a socket.io connection and allows to mock socket.io server behaviour. On instantiation we:
   - empty `io.managers` object which is a cache of socket.io `io.Manager` instances;
   - override `io.Manager.prototype` to work with current instance of the mocked server.
-  
+
 ```js
 var io = require("socket.io-client");
 var fixtureSocket = require("can-fixture-socket");
@@ -104,7 +104,7 @@ socket.emit("messages find", {rank: "good"}, function(err, response){
     console.log("Error: ", err);
     return;
   }
-  console.log(`We found ${response.count} good items", response.data);
+  console.log(`We found ${response.count} good items`, response.data);
   assert.equal(response.count, 3)
 });
 ```

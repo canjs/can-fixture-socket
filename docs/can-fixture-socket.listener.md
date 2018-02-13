@@ -9,7 +9,7 @@ Socket event listener handler expects one or more data arguments and an optional
 
 ```js
 // Client:
-socket.on("news": function handler(data, ackCb){
+socket.on("news", function handler(data, ackCb){
   console.log("received some news", data);
   ackCb("Acknowledged", "thank you");
 });
