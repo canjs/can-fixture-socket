@@ -27,13 +27,13 @@ server.onFeathersService("messages", fixtureStore})
 
 Instantiate fixture store by calling [can-fixture.store] and provide FeathersJS service name:
 ```js
-const fixtureStore = fixture.store([
-	{_id: 1, title: 'One'},
-	{_id: 2, title: 'Two'},
-	{_id: 3, title: 'Three'}
-], new canSet.Algebra(canSet.props.id('_id')));
+const fixtureStore = fixture.store( [
+	{ _id: 1, title: "One" },
+	{ _id: 2, title: "Two" },
+	{ _id: 3, title: "Three" }
+], new canSet.Algebra( canSet.props.id( "_id" ) ) );
 
-mockServer.onFeathersService('messages', fixtureStore, {id: "_id"});
+mockServer.onFeathersService( "messages", fixtureStore, { id: "_id" } );
 ```
 
 This will emulate FeathersJS server CRUD service.
@@ -43,21 +43,21 @@ Now from Feathers client app you can do:
 // Import dependencies:
 import io from "socket.io-client";
 
-import feathers from 'feathers/client';
-import feathersSocketio from 'feathers-socketio/client';
-import hooks from 'feathers-hooks';
+import feathers from "feathers/client";
+import feathersSocketio from "feathers-socketio/client";
+import hooks from "feathers-hooks";
 
 // Configure Feathers client app:
-const socket = io("http://api.my-feathers-server.com");
+const socket = io( "http://api.my-feathers-server.com" );
 const app = feathers()
-	.configure(hooks())
-	.configure(feathersSocketio(socket));
+	.configure( hooks() )
+	.configure( feathersSocketio( socket ) );
 
 // Create client Feathers service:
-const messagesService = app.service('messages');
+const messagesService = app.service( "messages" );
 
 // Test:
-messagesService.get(1).then(function(data){
-	assert.deepEqual(data, {id: 1, title: 'One'}, 'get should receive an item');
-});
+messagesService.get( 1 ).then( function( data ) {
+	assert.deepEqual( data, { id: 1, title: "One" }, "get should receive an item" );
+} );
 ```
