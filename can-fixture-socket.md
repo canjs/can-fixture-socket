@@ -26,30 +26,30 @@ With three simple steps you can test your real-time application that uses socket
  3. test your application.
 
 ```js
-var fixtureSocket = require("can-fixture-socket");
+import fixtureSocket from "can-fixture-socket";
 
 // Import socket-io client:
-var io = require("socket.io-client");
+import io from "socket.io-client";
 
 // Create a mock server that intercepts socket.io:
-var mockServer = new fixtureSocket.Server(io);
+const mockServer = new fixtureSocket.Server( io );
 
 // Mock server behavior
-mockServer.on("connection", function(){
-  mockServer.emit("notifications", {test: "OK"})
-});
+mockServer.on( "connection", function() {
+	mockServer.emit( "notifications", { test: "OK" } );
+} );
 
 // Client. Create socket.io connection:
-var socket = io("http://localhost:8080/api");
+const socket = io( "http://localhost:8080/api" );
 
 // Test your application:
-socket.on("connect", function(){
-  assert.ok(true, "socket connected");
-});
+socket.on( "connect", function() {
+	assert.ok( true, "socket connected" );
+} );
 
-socket.on("notifications", function(data){
-  assert.deepEqual(data, {test: "OK"}, "received notifications message");
-});
+socket.on( "notifications", function( data ) {
+	assert.deepEqual( data, { test: "OK" }, "received notifications message" );
+} );
 ```
 
 @body
@@ -62,31 +62,32 @@ once connected, creates a message, and logs when the message is created.
 That app could look like the following:
 
 ```js
-var socket = io();
-socket.on("connect", function(){
-  socket.emit("messages create", {text: "A new message"});
-});
-socket.on("message created", function(data){
-  // data.text === "A new message"
-  console.log("Server sent out a new message we just created", data);
-});
+const socket = io();
+socket.on( "connect", function() {
+	socket.emit( "messages create", { text: "A new message" } );
+} );
+socket.on( "message created", function( data ) {
+
+	// data.text === "A new message"
+	console.log( "Server sent out a new message we just created", data );
+} );
 ```
 
 To test this, we'll first use [can-fixture-socket.Server can-fixture-socket.Server] to intercept the socket connection:
 
 ```js
-var io = require("socket.io-client");
-var fixtureSocket = require("can-fixture-socket");
-var mockServer = new fixtureSocket.Server(io);
+import io from "socket.io-client";
+import fixtureSocket from "can-fixture-socket";
+const mockServer = new fixtureSocket.Server( io );
 ```
 
 Now we can mock the socket server by creating socket event listeners and emitting socket events:
 
 ```js
-mockServer.on("messages create", function(data){
-  console.log("New message received", data);
-  mockServer.emit("message created", data);
-});
+mockServer.on( "messages create", function( data ) {
+	console.log( "New message received", data );
+	mockServer.emit( "message created", data );
+} );
 ```
 
 To see this in action:
@@ -98,26 +99,27 @@ To see this in action:
 
 We also can use socket.io [acknowledgement callbacks](http://socket.io/docs/#sending-and-getting-data-(acknowledgements)):
 ```js
-mockServer.on("users create", function(user, ackCb){
-    console.log("Simulating saving a new user to DB and return the new user id", user);
+mockServer.on( "users create", function( user, ackCb ) {
+	console.log( "Simulating saving a new user to DB and return the new user id", user );
 
-    ackCB({
-        id: Math.random()
-    });
-});
+	ackCB( {
+		id: Math.random()
+	} );
+} );
 ```
 
 Client code:
 
 ```js
-var socket = io();
-socket.on("connect", function(){
-    socket.emit("users create", {name: "Ilya", likes: "skiing"}, function (data) {
-        // data is what server calls the acknowledgement callback
-        // with (e.g. data.id is the new user id).
-        console.log(data.id);
-    });
-});
+const socket = io();
+socket.on( "connect", function() {
+	socket.emit( "users create", { name: "Ilya", likes: "skiing" }, function( data ) {
+
+		// data is what server calls the acknowledgement callback
+		// with (e.g. data.id is the new user id).
+		console.log( data.id );
+	} );
+} );
 ```
 
 ## Use with can-fixture.Store
@@ -126,37 +128,38 @@ With can-fixture [can-fixture.store] we can create a store of items and emulate 
 
 ```js
 // Import can-fixture that provides `store` method for creating a store:
-var fixture = require("can-fixture");
-var canSet = require("can-set");
+import fixture from "can-fixture";
+
+import canSet from "can-set";
 
 // Create a fixture store:
-var messagesStore = fixture.store([
-    {id: 1, title: "One"},
-    {id: 2, title: "Two"},
-    {id: 3, title: "Three"}
-], new canSet.Algebra({}));
+const messagesStore = fixture.store( [
+	{ id: 1, title: "One" },
+	{ id: 2, title: "Two" },
+	{ id: 3, title: "Three" }
+], new canSet.Algebra( {} ) );
 ```
 
 We can mock the socket.io connection with the rich behavior of _fixture stores_ using the [can-fixture-socket.requestHandlerToListener] helper.  `requestHandlerToListener`
 converts a _fixture store request handler_ to a _socket.io event listener_.
 
 ```js
-var fixtureSocket = require("can-fixture-socket");
-var io = require("socket.io-client");
-var mockServer = new fixtureSocket.Server(io);
+import fixtureSocket from "can-fixture-socket";
+import io from "socket.io-client";
+const mockServer = new fixtureSocket.Server( io );
 
-mockServer.on("messages get", fixtureSocket.requestHandlerToListener( messagesStore.getData ));
+mockServer.on( "messages get", fixtureSocket.requestHandlerToListener( messagesStore.getData ) );
 ```
 
 Or we can use [can-fixture-socket.storeToListeners] helper to convert all CRUD _fixture store request handlers_ into _socket.io event listeners_:
 
 ```js
-var listeners = fixtureSocket.storeToListeners( messagesStore );
-mockServer.on({
-    "messages remove": listeners.destroyData,
-    "messages create": listeners.createData,
-    "messages update": listeners.updateData
-});
+const listeners = fixtureSocket.storeToListeners( messagesStore );
+mockServer.on( {
+	"messages remove": listeners.destroyData,
+	"messages create": listeners.createData,
+	"messages update": listeners.updateData
+} );
 ```
 
 ## Use with FeathersJS
@@ -168,37 +171,37 @@ The mocked server exposes [can-fixture-socket.Server.prototype.onFeathers] metho
 For example, given the following FeathersJS client app:
 
 ```js
-var socket = io("http://api.my-feathers-server.com");
-var app = feathers()
-	.configure(hooks())
-	.configure(feathersSocketio(socket));
+const socket = io( "http://api.my-feathers-server.com" );
+const app = feathers()
+	.configure( hooks() )
+	.configure( feathersSocketio( socket ) );
 
 // Create FeathersJS CRUD service for "messages" resource:
-var messagesService = app.service("messages");
+const messagesService = app.service( "messages" );
 ```
 
 We can simulate it with a [can-fixture.store] as follows:
 
 ```js
-var messagesStore = fixture.store([
-    {id: 1, title: "One"},
-    {id: 2, title: "Two"},
-    {id: 3, title: "Three"}
-], new canSet.Algebra({}));
+const messagesStore = fixture.store( [
+	{ id: 1, title: "One" },
+	{ id: 2, title: "Two" },
+	{ id: 3, title: "Three" }
+], new canSet.Algebra( {} ) );
 
-mockServer.onFeathersService("messages", fixtureStore);
+mockServer.onFeathersService( "messages", fixtureStore );
 ```
 
 Now you can test your FeathersJS app:
 
 ```js
-messagesService.find({}).then(function(data){
-    assert.equal(data.total, 3, "find should receive 3 items");
-});
-messagesService.get(1).then(function(data){
-    assert.deepEqual(data, {id: 1, title: "One"}, "get should receive an item");
-});
-messagesService.create({title: "Four"}).then(function(data){
-    assert.equal(data.title, "Four", "create should add an new item");
-});
+messagesService.find( {} ).then( function( data ) {
+	assert.equal( data.total, 3, "find should receive 3 items" );
+} );
+messagesService.get( 1 ).then( function( data ) {
+	assert.deepEqual( data, { id: 1, title: "One" }, "get should receive an item" );
+} );
+messagesService.create( { title: "Four" } ).then( function( data ) {
+	assert.equal( data.title, "Four", "create should add an new item" );
+} );
 ```
