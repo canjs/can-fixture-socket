@@ -1,6 +1,6 @@
 {
   "name": "can-fixture-socket",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Simulate socket connections",
   "homepage": "https://github.com/canjs/can-fixture-socket",
   "repository": {
