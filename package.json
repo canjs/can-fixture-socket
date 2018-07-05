@@ -45,8 +45,8 @@
     ]
   },
   "dependencies": {
-    "can-fixture": "^3.0.0-pre.0",
-    "can-util": "^3.9.5"
+    "can-fixture": "^3.0.0",
+    "can-assign": "^1.2.0"
   },
   "devDependencies": {
     "can-set-legacy": "<2.0.0",
@@ -64,6 +64,6 @@
     "steal": "^1.5.6",
     "steal-qunit": "^1.0.1",
     "steal-tools": "^1.1.2",
-    "testee": "^0.7.0"
+    "testee": "^0.8.0"
   }
 }

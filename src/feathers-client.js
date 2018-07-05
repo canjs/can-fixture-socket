@@ -38,7 +38,7 @@
  */
 
 var storeToListeners = require('./store').storeToListeners;
-var assign = require('can-util/js/assign/assign');
+var assign = require('can-assign');
 
 /**
  * Subscribes to mocked socket server events for FeathersJS service.
