@@ -2,7 +2,7 @@ var QUnit = require('steal-qunit');
 var fixtureSocket = require('can-fixture-socket');
 var fixture = require('can-fixture');
 var extractResponse = require('can-fixture/core').extractResponse;
-var canSet = require("can-set");
+var canSet = require("can-set-legacy");
 var io = require('socket.io-client');
 var feathers = require('feathers/client');
 var feathersSocketio = require('feathers-socketio/client');
@@ -64,7 +64,7 @@ QUnit.test('basic connection', function(assert){
 		assert.deepEqual(data, {test: 'OK'}, 'received notifications message');
 		// Unsubscribe after  we recieve the notification message.
 		socket.off('notifications', notificationHandler);
-		// Emit another notifications message from the server.  
+		// Emit another notifications message from the server.
 		// If we successfully unsubscribed, then assert.expect(7) should pass.
 		mockServer.emit('notifications', {test: 'No K.'});
 		done();
@@ -150,15 +150,15 @@ QUnit.test('Test with fixture store', function(assert){
 	//
 	// Mock server
 	//
-	
+
 	// Socket event handler can accept two arguments: data and a callback that is usually used as ACK.
-	
+
 	var messagesStore = fixture.store([
 		{id: 1, title: 'One'},
 		{id: 2, title: 'Two'},
 		{id: 3, title: 'Two'}
 	], new canSet.Algebra({}));
-	
+
 	// #1: directly process fixture.store:
 	mockServer.on('messages find', function(query, fn){
 		// Fixture.store methods expect two arguments `req` and `res`:
@@ -177,12 +177,12 @@ QUnit.test('Test with fixture store', function(assert){
 		};
 		messagesStore.getListData(req, res);
 	});
-	
+
 	// #2: We can use a helper wrapper for event helper:
 	mockServer.on({
 		'messages get': fixtureSocket.requestHandlerToListener(messagesStore.getData)
 	});
-	
+
 	// #3: We also can wrap fixture store to provide socket event ready methods:
 	var listeners = fixtureSocket.storeToListeners(messagesStore);
 	mockServer.on({
@@ -209,7 +209,11 @@ QUnit.test('Test with fixture store', function(assert){
 			assert.deepEqual(data, {id: 2, title: 'TwoPlus'}, 'emit("messages update"): received the updated item');
 		});
 		socket.emit('messages get', {id: 999}, function(err, data){
-			assert.deepEqual(err, {error: 404, message: 'no data'}, 'emit("messages get"): received 404 when looking for a non-existent item id');
+			assert.deepEqual(err, {
+				detail: "No record with matching identity (999).",
+				title: 'no data',
+				status: "404"
+			}, 'emit("messages get"): received 404 when looking for a non-existent item id');
 			done();
 		});
 	});
@@ -239,7 +243,7 @@ QUnit.test('FeathersJS protocol', function(assert){
 	], new canSet.Algebra(
 		canSet.props.id('_id')
 	));
-	
+
 	mockServer.onFeathersService('messages', fixtureStore, {id: '_id'});
 
 	//
@@ -283,9 +287,9 @@ QUnit.test('FeathersJS REST service', function(assert){
 		{id: 2, title: 'Two'},
 		{id: 3, title: 'Three'}
 	], new canSet.Algebra({}));
-	
+
 	mockServer.onFeathersService('messages', fixtureStore);
-	
+
 	//
 	// Prepare FeathersJS client app
 	//
@@ -294,16 +298,16 @@ QUnit.test('FeathersJS REST service', function(assert){
 	var app = feathers()
 		.configure(hooks())
 		.configure(feathersSocketio(socket));
-	
+
 	var messagesService = app.service('messages');
 
 	//
 	// Test client:
 	//
 	var done = assert.async();
-	
+
 	Promise.all([
-    
+
 		messagesService.find({}).then(function(data){
 			assert.equal(data.total, 3, 'find should receive 3 items');
 		}),
@@ -322,10 +326,10 @@ QUnit.test('FeathersJS REST service', function(assert){
 		messagesService.get(100).then(function(data){
 			assert.ok(false, 'Should have rejected this promise');
 		}).catch(function(err){
-			assert.equal(err.error, 404, 'get unexisting item should reject the promise with 404');
-			assert.equal(err.message, 'no data', 'and message No data');
+			assert.equal(err.status, "404", 'get unexisting item should reject the promise with 404');
+			assert.equal(err.title, 'no data', 'and message No data');
 		})
-	
+
 	]).then(function(){
 		done();
 	}).catch(function(err){
