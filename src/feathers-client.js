@@ -1,3 +1,4 @@
+"use strict";
 /*
  * FEATHERS protocol.
  * Feathers service api (REST provider): https://docs.feathersjs.com/rest/readme.html

@@ -1,3 +1,4 @@
+"use strict";
 var fixtureSocket = require('./src/index');
 var fixtureStore = require('./src/store');
 

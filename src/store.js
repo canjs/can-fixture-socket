@@ -1,3 +1,4 @@
+"use strict";
 var extractResponse = require('can-fixture/core').extractResponse;
 
 /**

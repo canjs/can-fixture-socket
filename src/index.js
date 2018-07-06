@@ -1,3 +1,4 @@
+"use strict";
 /*
  * Summary: `io(url)` creates an instance of `io.Manager` for the given url and stores it in cache of managers `io.managers`.
  * If `io` is called with the same URL several times it will lookup Manager in the cache.
