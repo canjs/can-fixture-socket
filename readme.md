@@ -5,8 +5,6 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/canjs/can-fixture-socket/blob/master/LICENSE.md)
 [![npm version](https://badge.fury.io/js/can-fixture-socket.svg)](https://www.npmjs.com/package/can-fixture-socket)
 [![Travis build status](https://travis-ci.org/canjs/can-fixture-socket.svg?branch=master)](https://travis-ci.org/canjs/can-fixture-socket)
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/canjs/can-fixture-socket?branch=master&svg=true)](https://ci.appveyor.com/project/matthewp/can-fixture-socket)
-[![Coverage status](https://coveralls.io/repos/github/canjs/can-fixture-socket/badge.svg?branch=master)](https://coveralls.io/github/canjs/can-fixture-socket?branch=master)
 [![Greenkeeper badge](https://badges.greenkeeper.io/canjs/can-fixture-socket.svg)](https://greenkeeper.io/)
 
 Intercepts socket.io connection and allows to simulate socket.io server behaviour.
