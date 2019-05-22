@@ -4,9 +4,8 @@ var fixture = require('can-fixture');
 var extractResponse = require('can-fixture/core').extractResponse;
 var canSet = require("can-set-legacy");
 var io = require('socket.io-client');
-var feathers = require('feathers/client');
-var feathersSocketio = require('feathers-socketio/client');
-var hooks = require('feathers-hooks');
+var feathers = require('@feathersjs/feathers');
+var feathersSocketio = require('@feathersjs/socketio-client');
 
 // Polyfills for Travis:
 var Promise = require('es6-promise-polyfill');
@@ -296,7 +295,6 @@ QUnit.test('FeathersJS REST service', function(assert){
 	var socket = io('http://api.my-feathers-server.com');
 
 	var app = feathers()
-		.configure(hooks())
 		.configure(feathersSocketio(socket));
 
 	var messagesService = app.service('messages');
