@@ -201,7 +201,12 @@ MockedSocket.prototype = {
  * @param dataArgs There could be either one or more data arguments (e.g. FeathersJS) and the last argument can be used for ACK callback. 
  */
 function pub(pubsub, event, dataArgs){
-	debug(' >>> pub ' + event);
+	debug(' >>> pub ' + event, dataArgs);
+	// Feathers does not emit the event and path like `messages::find` anymore
+	// The `path` or `serviceName` is now the first argument after the `event`
+	if (dataArgs && typeof dataArgs[0] === 'string' && pubsub[dataArgs[0] + '::' + event]) {
+		event = dataArgs.shift() + '::' + event;
+	}
 	var subscribers = pubsub[event] || [];
 	subscribers.forEach(function(subscriber){
 		subscriber.apply(null, dataArgs);
