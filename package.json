@@ -54,7 +54,7 @@
     "can-set-legacy": "<2.0.0",
     "detect-cyclic-packages": "^1.1.0",
     "done-serve": "^1.2.0",
-    "donejs-cli": "^1.0.1",
+    "donejs-cli": "^3.2.2",
     "es6-promise-polyfill": "^1.2.0",
     "generator-donejs": "^1.0.5",
     "jshint": "^2.9.1",
