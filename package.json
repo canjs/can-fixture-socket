@@ -42,7 +42,10 @@
       "generator-donejs",
       "donejs-cli",
       "steal-tools"
-    ]
+    ],
+    "paths": {
+      "@feathersjs/commons*lib/lib": "node_modules/@feathersjs/commons/lib/index.js"
+    }
   },
   "dependencies": {
     "can-fixture": "^3.0.0",
