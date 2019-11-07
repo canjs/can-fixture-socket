@@ -56,7 +56,7 @@
     "@feathersjs/socketio-client": "^1.2.1",
     "can-set-legacy": "<2.0.0",
     "detect-cyclic-packages": "^1.1.0",
-    "done-serve": "^1.2.0",
+    "done-serve": "^2.0.0",
     "donejs-cli": "^1.0.1",
     "es6-promise-polyfill": "^1.2.0",
     "generator-donejs": "^1.0.5",
