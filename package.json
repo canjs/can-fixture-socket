@@ -59,7 +59,7 @@
     "done-serve": "^1.2.0",
     "donejs-cli": "^1.0.1",
     "es6-promise-polyfill": "^1.2.0",
-    "generator-donejs": "^1.0.5",
+    "generator-donejs": "^3.4.2",
     "jshint": "^2.9.1",
     "object-assign": "^4.1.0",
     "socket.io-client": "^2.2.0",
